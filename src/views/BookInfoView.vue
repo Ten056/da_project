@@ -1,8 +1,22 @@
+<script setup>
+import { ref } from 'vue'
+import axios from 'axios'
+
+const todoData = ref(null)
+
+function getTodo() {
+  const url = `http://localhost:3000/users/0`
+  todoData.value = null
+  axios
+    .get(url)
+    .then((res) => todoData.value = res.data)
+    .catch((error) => todoData.value = error)
+}
+getTodo()
+</script>
+
 <template>
-  <div class="test">
-    <h1>計画確認画面</h1>
-    <h2>本のタイトル</h2>
-    <p>テストテストテスト</p>
-    <router-link to="/about">About</router-link>
-  </div>
+  <h1>Vue 3でJSONを読み込むサンプル(簡易版)</h1>
+  <p v-if="!todoData">Loading...</p>
+  <pre v-else>{{ todoData }}</pre>
 </template>
