@@ -1,4 +1,5 @@
 {
+
   "books": [
     {
       "id": 0, 
@@ -7,14 +8,9 @@
       "total_page" : 100
     }
   ],
-  "comments": [
-    {
-      "id": 1,
-      "body": "some comment",
-      "postId": 1
-    }
-  ],
-  "profile": {
-    "name": "typicode"
-  }
+
+  "users": [
+    { "id": 0, "name": "山田 太郎", "status_0": 32, "deadline": "2023-12-30", "unreadDays": 10 }
+  ]
+
 }
