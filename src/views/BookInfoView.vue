@@ -193,7 +193,7 @@ const ratioText = {
       </div>
     </div>
     <div class="sub-right-box">
-      <div class="progress-title">進捗ステータス</div>
+      <div class="progress-title">計画進捗率</div>
       <div class="progress-container">
         <div class="progress-bar-outer">
           <div class="progress-bar" :style="{ width: userData.reading_rate * 4 + 'px' }">
@@ -253,11 +253,11 @@ const ratioText = {
           <td class="td-left">{{ userData.reading_rate }}％</td>
         </tr>
         <tr>
-          <td>理想の進捗レベル</td>
+          <td>理想の進捗率</td>
           <td class="td-left">{{ userData.idealReadingRate }}％</td>
         </tr>
         <tr>
-          <td>最低限の進捗レベル</td>
+          <td>最低限の進捗率</td>
           <td class="td-left">{{ userData.willReadingRate }}％</td>
         </tr>
       </table>
