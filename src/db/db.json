@@ -4,35 +4,35 @@
       "id": 0, 
       "thumbnail":"/0.png",
       "title": "json-server", 
-      "status": "inprogress",
+      "status": "in-progress",
       "total_page" : 100
     },
     {
       "id": 1, 
       "thumbnail":"/1.png",
       "title": "OOUI入門", 
-      "status": "finish",
+      "status": "in-progress",
       "total_page" : 150
     },
     {
       "id": 2, 
       "thumbnail":"/2.png",
       "title": "Vueのすべて", 
-      "status": "reserved",
+      "status": "in-progress",
       "total_page" : 120
     },
     {
       "id": 3, 
       "thumbnail":"/3.png",
       "title": "分かる！JavaScript", 
-      "status": "inprogress",
+      "status": "in-progress",
       "total_page" : 60
     },
     {
       "id": 4, 
       "thumbnail":"/4.png",
       "title": "インフラエンジニア入門", 
-      "status": "finish",
+      "status": "in-progress",
       "total_page" : 160
     }
   ],

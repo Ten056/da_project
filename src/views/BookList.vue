@@ -9,7 +9,7 @@
         <thead><tr>
           <th id="icon" @click="sortBy('id')" v-bind:class="{ 'sort-asc': sortKey === 'id' && sortOrder === 1, 'sort-desc': sortKey === 'id' && sortOrder === -1 }">アイコン</th>
           <th id="title" @click="sortBy('title')" v-bind:class="{ 'sort-asc': sortKey === 'title' && sortOrder === 1, 'sort-desc': sortKey === 'title' && sortOrder === -1 }">タイトル</th>
-          <th id="status" @click="sortBy('status')" v-bind:class="{ 'sort-asc': sortKey === 'status' && sortOrder === 1, 'sort-desc': sortKey === 'status' && sortOrder === -1 }">ステータス</th>
+          <th id="status" @click="sortBy('status')" v-bind:class="{ 'sort-asc': sortKey === 'status' && sortOrder === 1, 'sort-desc': sortKey === 'status' && sortOrder === -1 }">計画作成状況</th>
         </tr></thead>
 
         <tbody>
