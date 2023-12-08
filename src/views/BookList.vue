@@ -2,7 +2,7 @@
   <div class="booklist">
     <h1>予約済み図書一覧</h1>
     <div id="tmp">
-      <select><option>すべて</option></select>
+      <!-- <select><option>すべて</option></select> -->
     </div>
     <div id="mainContents">
       <table>
@@ -15,9 +15,9 @@
         <tbody>
           <p v-if="!todoData">Loading...</p>
           <tr v-else v-for="data in sortedUsers" v-bind:key="data">
-            <td><img v-bind:src='data.thumbnail' alt="icon"></td>
-            <td>{{ data.title }}</td>
-            <td>{{ data.status }}</td>
+            <td><router-link to='./users/{{ data.id }}'><img v-bind:src='data.thumbnail' alt="icon"></router-link></td>
+            <td><router-link to='./users/{{ data.id }}'>{{ data.title }}</router-link></td>
+            <td><router-link to='./users/{{ data.id }}'>{{ data.status }}</router-link></td>
           </tr>
         </tbody>
       </table>
@@ -74,7 +74,7 @@
   }
 </script>
 
-<style>
+<style scoped>
 table{
   border-collapse: collapse;
   border-spacing: 0;

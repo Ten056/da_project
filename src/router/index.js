@@ -32,7 +32,13 @@ const routes = [
     path: '/bookInfo',
     name: 'bookInfo',
     component: () => import('../views/BookInfoView.vue')
+  },
+  {
+    path: '/users/:id',
+    name: 'bookinfo_id',
+    component: () => import('../views/BookInfoView.vue')
   }
+
 ]
 
 const router = createRouter({

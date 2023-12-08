@@ -1,10 +1,10 @@
 <template>
   <nav>
-    <router-link to="/">Home</router-link> |
+    <!-- <router-link to="/">Home</router-link> |
     <router-link to="/about">About</router-link> |
-    <router-link to="/test">Test</router-link> |
-    <router-link to="/booklist">BookList</router-link> |
-    <router-link to="/bookInfo/0">本の計画</router-link>
+    <router-link to="/test">Test</router-link> | -->
+    <router-link to="/booklist">BookList</router-link> 
+    <!-- <router-link to="/bookInfo/0">本の計画</router-link> -->
   </nav>
   <router-view/>
 </template>
