@@ -5,6 +5,24 @@ import axios from 'axios'
 const userData = ref(null)
 const bookData = ref(null)
 const isData = ref(false)
+const isHoverR = ref(false)
+const isHoverT = ref(false)
+
+function mouseHover(type) {
+  if (type == 'r') {
+    isHoverR.value = true
+  } else {
+    isHoverT.value = true
+  }
+}
+
+function mouseLeave(type) {
+  if (type == 'r') {
+    isHoverR.value = false
+  } else {
+    isHoverT.value = false
+  }
+}
 
 function getNowDate() {
   const dt = new Date()
@@ -165,7 +183,7 @@ const ratioText = {
 </script>
 
 <template>
-  <h1>Vue 3でJSONを読み込むサンプル(簡易版)</h1>
+  <h1>あなたの読書計画</h1>
   <p v-if="!isData">Loading...</p>
   <div v-else>
     <div class="main-right-box">
@@ -179,12 +197,18 @@ const ratioText = {
       <div class="progress-container">
         <div class="progress-bar-outer">
           <div class="progress-bar" :style="{ width: userData.reading_rate * 4 + 'px' }">
-            <img src="img/turtle.png" class="icon" alt="Turtle"
-              :style="{ left: (userData.willReadingRate * 4 - 15) + 'px' }">
+            <img src="img/turtle.png" class="icon" alt="Turtle" v-on:mouseover="mouseHover('t')"
+              v-on:mouseleave="mouseLeave('t')" :style="{ left: (userData.willReadingRate * 4 - 20) + 'px' }">
             <div class="progress-label" :style="{ left: (userData.reading_rate * 4 - 20) + 'px' }">{{
               userData.reading_rate }} %</div>
-            <img src="img/rabbit.svg" class="icon" alt="Rabbit"
-              :style="{ left: (userData.idealReadingRate * 4 - 15) + 'px' }">
+            <img src="img/rabbit.svg" class="icon" alt="Rabbit" v-on:mouseover="mouseHover('r')"
+              v-on:mouseleave="mouseLeave('r')" :style="{ left: (userData.idealReadingRate * 4 - 20) + 'px' }">
+          </div>
+          <div v-if="isHoverR" class="progress-r-label" :style="{ left: (userData.idealReadingRate * 4 - 20) + 'px' }">
+            {{ userData.idealReadingRate }} %
+          </div>
+          <div v-if="isHoverT" class="progress-t-label" :style="{ left: (userData.willReadingRate * 4 - 20) + 'px' }">
+            {{ userData.willReadingRate }} %
           </div>
         </div>
         <div class="progress-info">
@@ -201,52 +225,40 @@ const ratioText = {
       <div class="table-title">情報</div>
       <table>
         <tr>
-          <th>項目</th>
-          <th>値</th>
-        </tr>
-        <tr>
-          <td>名前</td>
-          <td>{{ userData.name }}</td>
-        </tr>
-        <tr>
-          <td>本1の状態</td>
-          <td>{{ userData.status_0 }}</td>
-        </tr>
-        <tr>
-          <td>読書開始日</td>
-          <td>{{ userData.startDate_0 }}</td>
-        </tr>
-        <tr>
-          <td>今日の日付</td>
-          <td>{{ userData.today }}</td>
-        </tr>
-        <tr>
-          <td>読了予定日</td>
-          <td>{{ userData.deadline_0 }}</td>
-        </tr>
-        <tr>
-          <td>読めない日数</td>
-          <td>{{ userData.unreadDays_0 }}</td>
-        </tr>
-        <tr>
-          <td>タイトル</td>
-          <td>{{ bookData.title }}</td>
+          <td>本のタイトル</td>
+          <td class="td-left">「{{ bookData.title }}」</td>
         </tr>
         <tr>
           <td>総ページ数</td>
-          <td>{{ bookData.total_page }}</td>
+          <td class="td-left">{{ bookData.total_page }}ページ</td>
+        </tr>
+        <tr>
+          <td>読んだページ数</td>
+          <td class="td-left">{{ userData.status_0 }}ページ</td>
+        </tr>
+        <tr>
+          <td>読書開始日</td>
+          <td class="td-left">{{ userData.startDate_0 }}</td>
+        </tr>
+        <tr>
+          <td>読了予定日</td>
+          <td class="td-left">{{ userData.deadline_0 }}</td>
+        </tr>
+        <tr>
+          <td>読めない日数</td>
+          <td class="td-left">{{ userData.unreadDays_0 }}日</td>
         </tr>
         <tr>
           <td>読了率</td>
-          <td>{{ userData.reading_rate }}％</td>
+          <td class="td-left">{{ userData.reading_rate }}％</td>
         </tr>
         <tr>
-          <td>理想</td>
-          <td>{{ userData.idealReadingRate }}％</td>
+          <td>理想の進捗レベル</td>
+          <td class="td-left">{{ userData.idealReadingRate }}％</td>
         </tr>
         <tr>
-          <td>予定</td>
-          <td>{{ userData.willReadingRate }}％</td>
+          <td>最低限の進捗レベル</td>
+          <td class="td-left">{{ userData.willReadingRate }}％</td>
         </tr>
       </table>
     </div>
@@ -278,7 +290,7 @@ const ratioText = {
   left: 53%;
   padding: 10px;
   margin-top: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 40px;
   width: 440px;
   height: 250px;
   border-radius: 40px;
@@ -292,7 +304,7 @@ const ratioText = {
   margin-top: 10px;
   margin-bottom: 10px;
   width: 440px;
-  height: 700px;
+  height: 500px;
   border-radius: 40px;
   background-color: rgb(244, 244, 244);
   position: absolute;
@@ -318,7 +330,6 @@ const ratioText = {
   height: 20px;
   background-color: rgb(244, 235, 240);
   border: 1.5px solid rgb(255, 99, 132);
-  ;
   box-sizing: border-box;
   position: relative;
   border-radius: 10px;
@@ -335,6 +346,26 @@ const ratioText = {
 .progress-label {
   position: absolute;
   top: -35px;
+  background-color: #666;
+  color: white;
+  padding: 5px;
+  border-radius: 10px;
+  width: 40px;
+}
+
+.progress-r-label {
+  position: absolute;
+  top: -60px;
+  background-color: #666;
+  color: white;
+  padding: 5px;
+  border-radius: 10px;
+  width: 40px;
+}
+
+.progress-t-label {
+  position: absolute;
+  top: -60px;
   background-color: #666;
   color: white;
   padding: 5px;
@@ -392,5 +423,9 @@ td {
 th {
   background-color: #f2f2f2;
   color: black;
+}
+
+.td-left {
+  text-align: center;
 }
 </style>
