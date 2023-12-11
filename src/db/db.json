@@ -1,62 +1,56 @@
 {
   "books": [
     {
-      "id": 0, 
-      "thumbnail":"/0.png",
-      "title": "json-server", 
+      "id": 0,
+      "thumbnail": "/0.png",
+      "title": "json-server",
       "status": 100,
-      "total_page" : 100,
+      "total_page": 100,
       "startDate": "2023-12-01",
       "deadline": "2023-12-20",
       "unreadDays": 15
     },
     {
-      "id": 1, 
-      "thumbnail":"/1.png",
-      "title": "OOUI入門", 
+      "startDate": "2023-12-11",
+      "deadline": "2023-12-14",
+      "unreadDays": 4,
+      "thumbnail": "/1.png",
+      "title": "OOUI入門",
+      "status": 0,
+      "total_page": 150,
+      "id": 1
+    },
+    {
+      "startDate": "2023-12-11",
+      "deadline": "",
+      "unreadDays": "",
+      "thumbnail": "/2.png",
+      "title": "Vueのすべて",
       "status": -1,
-      "total_page" : 150,
-      "startDate": null,
-      "deadline": null,
-      "unreadDays": null
+      "total_page": 120,
+      "id": 2
     },
     {
-      "id": 2, 
-      "thumbnail":"/2.png",
-      "title": "Vueのすべて", 
-      "status": 80,
-      "total_page" : 120,
-      "startDate": "2023-12-01",
-      "deadline": "2023-12-30",
-      "unreadDays": 18
-    },
-    {
-      "id": 3, 
-      "thumbnail":"/3.png",
-      "title": "分かる！JavaScript", 
+      "id": 3,
+      "thumbnail": "/3.png",
+      "title": "分かる！JavaScript",
       "status": null,
-      "total_page" : 60,
+      "total_page": 60,
       "startDate": null,
       "deadline": null,
       "unreadDays": null
     },
     {
-      "id": 4, 
-      "thumbnail":"/4.png",
-      "title": "インフラエンジニア入門", 
-      "status": null,
-      "total_page" : 160,
       "startDate": null,
-      "deadline": null,
-      "unreadDays": null
+      "deadline": "2023-12-07",
+      "unreadDays": 2,
+      "id": 4
     }
   ],
-
   "users": [
-    { 
+    {
       "id": 0,
       "name": "山田 太郎"
     }
   ]
-
 }
