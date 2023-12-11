@@ -34,10 +34,15 @@ const routes = [
     component: () => import('../views/BookInfoView.vue')
   },
   {
-    path: '/users/:id',
-    name: 'bookinfo_id',
-    component: () => import('../views/BookInfoView.vue')
-  }
+    path: '/bookInfo/:id/:status',
+    name: 'bookInfo_unscheduled',
+    component: () => import('../views/UnscheduledTest.vue')
+  },
+  // {
+  //   path: '/users/:id',
+  //   name: 'bookinfo_id',
+  //   component: () => import('../views/BookInfoView.vue')
+  // }
 
 ]
 

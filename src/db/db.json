@@ -4,55 +4,58 @@
       "id": 0, 
       "thumbnail":"/0.png",
       "title": "json-server", 
-      "status": "in-progress",
-      "total_page" : 100
+      "status": 100,
+      "total_page" : 100,
+      "startDate": "2023-12-01",
+      "deadline": "2023-12-20",
+      "unreadDays": 15
     },
     {
       "id": 1, 
       "thumbnail":"/1.png",
       "title": "OOUI入門", 
-      "status": "in-progress",
-      "total_page" : 150
+      "status": -1,
+      "total_page" : 150,
+      "startDate": null,
+      "deadline": null,
+      "unreadDays": null
     },
     {
       "id": 2, 
       "thumbnail":"/2.png",
       "title": "Vueのすべて", 
-      "status": "in-progress",
-      "total_page" : 120
+      "status": 80,
+      "total_page" : 120,
+      "startDate": "2023-12-01",
+      "deadline": "2023-12-30",
+      "unreadDays": 18
     },
     {
       "id": 3, 
       "thumbnail":"/3.png",
       "title": "分かる！JavaScript", 
-      "status": "in-progress",
-      "total_page" : 60
+      "status": null,
+      "total_page" : 60,
+      "startDate": null,
+      "deadline": null,
+      "unreadDays": null
     },
     {
       "id": 4, 
       "thumbnail":"/4.png",
       "title": "インフラエンジニア入門", 
-      "status": "in-progress",
-      "total_page" : 160
+      "status": null,
+      "total_page" : 160,
+      "startDate": null,
+      "deadline": null,
+      "unreadDays": null
     }
   ],
 
   "users": [
     { 
       "id": 0,
-      "name": "山田 太郎",
-      "status_0": 80,
-      "startDate_0": "2023-12-01",
-      "deadline_0": "2023-12-30",
-      "unreadDays_0": 15,
-      "status_1": -1,
-      "startDate_1": null,
-      "deadline_1": null,
-      "unreadDays_1": null,
-      "status_2": 80,
-      "startDate_2": "2023-12-01",
-      "deadline_2": "2023-12-30",
-      "unreadDays_2": 18
+      "name": "山田 太郎"
     }
   ]
 
