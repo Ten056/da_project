@@ -59,10 +59,10 @@ function getDaysBetweenDate(dateStr1, dateStr2) {
 
 function getIdealReadingRate() {
   // 開始日から読了予定日までの日数
-  let diffAllDays = getDaysBetweenDate(userData.value.startDate_0, userData.value.deadline_0)
+  let diffAllDays = getDaysBetweenDate(bookData.value.startDate, bookData.value.deadline)
 
   // 開始日から今日までの日数
-  let diffToday = getDaysBetweenDate(userData.value.startDate_0, userData.value.today)
+  let diffToday = getDaysBetweenDate(bookData.value.startDate, userData.value.today)
 
   if (diffAllDays <= diffToday) { // 予定では終了している場合
     userData.value.willReadingRate = 100
@@ -72,7 +72,7 @@ function getIdealReadingRate() {
   }
 
   // 読めない日数を引く
-  diffAllDays -= userData.value.unreadDays_0
+  diffAllDays -= bookData.value.unreadDays
 
   if (diffAllDays <= diffToday) { // 理想では終了している場合
     userData.value.idealReadingRate = 100
@@ -102,7 +102,7 @@ function getData() {
         .get(userUrl)
         .then((res) => {
           userData.value = res.data
-          userData.value.reading_rate = calcReadingRate(res.data.status_0, data.total_page)
+          userData.value.reading_rate = calcReadingRate(data.status, data.total_page)
           userData.value.today = getNowDate()
         })
         .then(() => {
@@ -195,7 +195,7 @@ const ratioText = {
   <div v-else>
     <div class="main-right-box">
       <div class="doughnut-graph">
-        <Doughnut :data="data(userData.status_0, bookData.total_page - userData.status_0)" :options="options"
+        <Doughnut :data="data(bookData.status, bookData.total_page - bookData.status)" :options="options"
           :plugins="[ratioText]" />
       </div>
     </div>
@@ -220,10 +220,10 @@ const ratioText = {
         </div>
         <div class="progress-info">
           <div>
-            <span class="start-date">開始日<br />12/1</span>
+            <span class="start-date">開始日<br />{{ bookData.startDate }}</span>
           </div>
           <div>
-            <span class="end-date">読了日<br />12/30</span>
+            <span class="end-date">読了日<br />{{ bookData.deadline }}</span>
           </div>
         </div>
       </div>
@@ -241,19 +241,19 @@ const ratioText = {
         </tr>
         <tr>
           <td>読んだページ数</td>
-          <td class="td-left">{{ userData.status_0 }}ページ</td>
+          <td class="td-left">{{ bookData.status }}ページ</td>
         </tr>
         <tr>
           <td>読書開始日</td>
-          <td class="td-left">{{ userData.startDate_0 }}</td>
+          <td class="td-left">{{ bookData.startDate }}</td>
         </tr>
         <tr>
           <td>読了予定日</td>
-          <td class="td-left">{{ userData.deadline_0 }}</td>
+          <td class="td-left">{{ bookData.deadline }}</td>
         </tr>
         <tr>
           <td>読めない日数</td>
-          <td class="td-left">{{ userData.unreadDays_0 }}日</td>
+          <td class="td-left">{{ bookData.unreadDays }}日</td>
         </tr>
         <tr>
           <td>読了率</td>

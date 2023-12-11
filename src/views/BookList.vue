@@ -15,7 +15,10 @@
         <tbody>
           <p v-if="!todoData">Loading...</p>
           <tr v-else v-for="data in sortedUsers" v-bind:key="data">
-            <td><router-link :to="`./bookInfo/${data.id}`"><img v-bind:src='data.thumbnail' alt="icon"></router-link></td>
+            <td>
+              <router-link v-if="data.status !== -1"  :to="`./bookInfo/${data.id}`"><img v-bind:src='data.thumbnail' alt="icon"></router-link>
+              <router-link v-if="data.status === -1"  :to="`./bookInfo/${data.id}/${data.status}`"><img v-bind:src='data.thumbnail' alt="icon"></router-link>
+            </td>
             <td><router-link :to="`./bookInfo/${data.id}`">{{ data.title }}</router-link></td>
             <td><router-link :to="`./bookInfo/${data.id}`">{{ data.status }}</router-link></td>
           </tr>
