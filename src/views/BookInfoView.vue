@@ -7,6 +7,7 @@ const route = useRoute();
 let str = route.path;
 let lastSlash = str.lastIndexOf('/');
 let id = str.substring(lastSlash + 1);
+const status = `status_${id}`
 console.log(id);
 
 const userData = ref(null)
@@ -122,6 +123,15 @@ import { Chart as ChartJS, ArcElement, Tooltip, Title, Legend } from 'chart.js'
 import { Doughnut } from 'vue-chartjs'
 ChartJS.register(ArcElement, Tooltip, Title, Legend)
 
+
+function isMobileView() {
+  return window.innerWidth <= 600;  // 600pxをスマートフォンの閾値とします。
+}
+
+const fontRate = isMobileView() ? 0.7 : 1;  // スマートフォンでは80%に、それ以外では100%に設定
+const barWidth = isMobileView() ? window.innerWidth * 0.75 : 400;  // スマートフォンでは80%に、それ以外では100%に設定
+const circleLeft = isMobileView() ? 28 * window.innerWidth / 430 : 20;
+
 // チャート用のデータ
 const data = (read, unread) => {
   return {
@@ -146,10 +156,10 @@ const options = {
   plugins: {
     title: {
       display: true,
-      text: '　この本の読了率',
+      text: 'この本の読了率',
       font: {
         weight: 'bold',
-        size: 30
+        size: 30 * fontRate
       },
     },
     legend: {
@@ -176,7 +186,7 @@ const ratioText = {
     //チャート描画部分の中央を指定
     ctx.fillRect(width / 2, top + (height / 2), 0, 0)
     //フォントのスタイル指定
-    ctx.font = 'bold 50px Roboto'
+    ctx.font = `bold ${50 * fontRate}px Roboto`
     ctx.fillStyle = '#333333'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
@@ -194,8 +204,8 @@ const ratioText = {
   <p v-if="!isData">Loading...</p>
   <div v-else>
     <div class="main-right-box">
-      <div class="doughnut-graph">
-        <Doughnut :data="data(bookData.status, bookData.total_page - bookData.status)" :options="options"
+      <div class="doughnut-graph" :style="{ 'margin-left': circleLeft + 'px' }">
+        <Doughnut :data="data(userData[status], bookData.total_page - userData.status_0)" :options="options"
           :plugins="[ratioText]" />
       </div>
     </div>
@@ -203,18 +213,22 @@ const ratioText = {
       <div class="progress-title">計画進捗率</div>
       <div class="progress-container">
         <div class="progress-bar-outer">
-          <div class="progress-bar" :style="{ width: userData.reading_rate * 4 + 'px' }">
-            <img src="img/turtle.png" class="icon" alt="Turtle" v-on:mouseover="mouseHover('t')"
-              v-on:mouseleave="mouseLeave('t')" :style="{ left: (userData.willReadingRate * 4 - 20) + 'px' }">
-            <div class="progress-label" :style="{ left: (userData.reading_rate * 4 - 20) + 'px' }">{{
+          <div class="progress-bar" :style="{ width: userData.reading_rate * barWidth / 100 + 'px' }">
+            <img src="/img/sadface.svg" class="icon" alt="Turtle" v-on:mouseover="mouseHover('t')"
+              v-on:mouseleave="mouseLeave('t')"
+              :style="{ left: (userData.willReadingRate * barWidth / 100 - 20) + 'px' }">
+            <div class="progress-label" :style="{ left: (userData.reading_rate * barWidth / 100 - 25) + 'px' }">{{
               userData.reading_rate }} %</div>
-            <img src="img/rabbit.svg" class="icon" alt="Rabbit" v-on:mouseover="mouseHover('r')"
-              v-on:mouseleave="mouseLeave('r')" :style="{ left: (userData.idealReadingRate * 4 - 20) + 'px' }">
+            <img src="/img/smile.svg" class="icon" alt="Rabbit" v-on:mouseover="mouseHover('r')"
+              v-on:mouseleave="mouseLeave('r')"
+              :style="{ left: (userData.idealReadingRate * barWidth / 100 - 20) + 'px' }">
           </div>
-          <div v-if="isHoverR" class="progress-r-label" :style="{ left: (userData.idealReadingRate * 4 - 20) + 'px' }">
+          <div v-if="isHoverR" class="progress-r-label"
+            :style="{ left: (userData.idealReadingRate * barWidth / 100 - 20) + 'px' }">
             {{ userData.idealReadingRate }} %
           </div>
-          <div v-if="isHoverT" class="progress-t-label" :style="{ left: (userData.willReadingRate * 4 - 20) + 'px' }">
+          <div v-if="isHoverT" class="progress-t-label"
+            :style="{ left: (userData.willReadingRate * barWidth / 100 - 20) + 'px' }">
             {{ userData.willReadingRate }} %
           </div>
         </div>
@@ -277,10 +291,11 @@ const ratioText = {
   width: 400px;
   height: 400px;
   position: absolute;
-  margin-left: 10px;
+  margin-left: 15px;
 }
 
 .main-right-box {
+  top: 480px;
   left: 53%;
   padding: 10px;
   margin-top: 10px;
@@ -292,7 +307,6 @@ const ratioText = {
 }
 
 .sub-right-box {
-  top: 660px;
   /* right: 10px; */
   left: 53%;
   padding: 10px;
@@ -330,6 +344,7 @@ const ratioText = {
   font-family: 'Robot';
   font-weight: 700;
   color: #666;
+  text-align: center;
 }
 
 .progress-bar-outer {
@@ -412,6 +427,7 @@ const ratioText = {
   font-family: 'Robot';
   font-weight: 700;
   color: #666;
+  text-align: center;
 }
 
 table {
@@ -434,5 +450,163 @@ th {
 
 .td-left {
   text-align: center;
+}
+
+/* スマートフォン用のスタイル */
+@media (max-width: 600px) {
+  .doughnut-graph {
+    width: 250px;
+    height: 250px;
+    margin-top: 10px;
+  }
+
+
+  .sub-right-box {
+    width: 75%;
+    left: 5%;
+    right: 5%;
+    top: 170px;
+    /* margin-top: 20px; */
+    margin: 0 auto;
+  }
+
+  .progress-container {
+    width: 100%;
+    padding: 10px;
+    margin-top: 80px;
+  }
+
+  .progress-title {
+    margin-top: 10px;
+    font-size: 30px;
+    align-items: center;
+    font-family: 'Robot';
+    font-weight: 700;
+    color: #666;
+    text-align: center;
+  }
+
+  .progress-bar-outer {
+    width: 100%;
+    height: 20px;
+    background-color: rgb(244, 235, 240);
+    border: 1.5px solid rgb(255, 99, 132);
+    box-sizing: border-box;
+    position: relative;
+    border-radius: 10px;
+  }
+
+  .progress-bar {
+    width: 100%;
+    background-color: rgb(255, 99, 132);
+    height: 18.5px;
+    position: relative;
+    border-radius: 9px;
+  }
+
+  .progress-label {
+    position: absolute;
+    top: -35px;
+    background-color: #666;
+    color: white;
+    padding: 5px;
+    border-radius: 10px;
+    width: 40px;
+    font-size: small;
+  }
+
+  .progress-r-label {
+    position: absolute;
+    top: -60px;
+    background-color: #666;
+    color: white;
+    padding: 5px;
+    border-radius: 10px;
+    width: 40px;
+  }
+
+  .progress-t-label {
+    position: absolute;
+    top: -60px;
+    background-color: #666;
+    color: white;
+    padding: 5px;
+    border-radius: 10px;
+    width: 40px;
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+  }
+
+  .icon {
+    position: absolute;
+    width: 30px;
+    bottom: 20px;
+  }
+
+  .start-date {
+    font-family: 'Roboto';
+    font-weight: 600;
+    left: -30px
+  }
+
+  .end-date {
+    font-family: 'Roboto';
+    font-weight: 600;
+    left: 30px
+  }
+
+  .table-title {
+    margin-top: 10px;
+    font-size: 30px;
+    align-items: center;
+    font-family: 'Robot';
+    font-weight: 700;
+    color: #666;
+  }
+
+  .main-right-box {
+    width: 75%;
+    height: 300px;
+    left: 5%;
+    right: 5%;
+    top: 460px;
+    margin-top: 20px;
+    margin:auto;
+  }
+
+  .info-left-box {
+    width: 75%;
+    height: 65%;
+    left: 5%;
+    right: 5%;
+    top: 800px;
+    margin:auto;
+  }
+
+  .progress-container {
+    width: calc(100% - 20px);
+  }
+
+  .table-title,
+  .progress-title {
+    font-size: 24px;
+  }
+
+  table {
+    width: calc(100% - 40px);
+  }
+
+  .icon {
+    width: 25px;
+  }
+
+  h1 {
+    text-align: center;
+  }
 }
 </style>
