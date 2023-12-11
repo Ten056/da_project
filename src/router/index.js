@@ -29,7 +29,7 @@ const routes = [
     component: () => import('../views/BookList.vue')
   },
   {
-    path: '/bookInfo',
+    path: '/bookInfo/:id',
     name: 'bookInfo',
     component: () => import('../views/BookInfoView.vue')
   },

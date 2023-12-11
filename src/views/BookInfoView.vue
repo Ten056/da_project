@@ -1,6 +1,13 @@
 <script setup>
 import { ref } from 'vue'
 import axios from 'axios'
+import {useRoute} from "vue-router";
+
+const route = useRoute();
+let str = route.path;
+let lastSlash = str.lastIndexOf('/');
+let id = str.substring(lastSlash + 1);
+console.log(id);
 
 const userData = ref(null)
 const bookData = ref(null)
@@ -77,7 +84,7 @@ function getIdealReadingRate() {
 
 function getData() {
   // apiのURL
-  const bookUrl = `http://localhost:3000/books/0`
+  const bookUrl = `http://localhost:3000/books/${id}`
   const userUrl = `http://localhost:3000/users/0`
 
   // data初期化
