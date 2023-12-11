@@ -19,8 +19,16 @@
               <router-link v-if="data.status !== -1"  :to="`./bookInfo/${data.id}`"><img v-bind:src='data.thumbnail' alt="icon"></router-link>
               <router-link v-if="data.status === -1"  :to="`./bookInfo/${data.id}/${data.status}`"><img v-bind:src='data.thumbnail' alt="icon"></router-link>
             </td>
-            <td><router-link :to="`./bookInfo/${data.id}`">{{ data.title }}</router-link></td>
-            <td><router-link :to="`./bookInfo/${data.id}`">{{ data.status }}</router-link></td>
+            <td>
+              <router-link v-if="data.status !== -1" :to="`./bookInfo/${data.id}`">{{ data.title }}</router-link>
+              <router-link v-if="data.status === -1" :to="`./bookInfo/${data.id}/${data.status}`">{{ data.title }}</router-link>
+            </td>
+            <td>
+              <router-link v-if="(data.status !== -1)&(data.total_page !== data.status)" :to="`./bookInfo/${data.id}`">in-progress</router-link>
+              <router-link v-if="(data.status !== -1)&(data.total_page === data.status)" :to="`./bookInfo/${data.id}`">finish</router-link>
+              <router-link v-if="data.status === -1" :to="`./bookInfo/${data.id}/${data.status}`">unscheduled</router-link>
+
+            </td>
           </tr>
         </tbody>
       </table>

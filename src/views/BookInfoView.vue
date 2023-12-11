@@ -7,7 +7,6 @@ const route = useRoute();
 let str = route.path;
 let lastSlash = str.lastIndexOf('/');
 let id = str.substring(lastSlash + 1);
-const status = `status_${id}`
 console.log(id);
 
 const userData = ref(null)
@@ -205,7 +204,7 @@ const ratioText = {
   <div v-else>
     <div class="main-right-box">
       <div class="doughnut-graph" :style="{ 'margin-left': circleLeft + 'px' }">
-        <Doughnut :data="data(userData[status], bookData.total_page - userData.status_0)" :options="options"
+        <Doughnut :data="data(bookData.status, bookData.total_page - bookData.status)" :options="options"
           :plugins="[ratioText]" />
       </div>
     </div>
