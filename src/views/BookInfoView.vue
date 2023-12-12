@@ -249,7 +249,7 @@ const addRecord = (flag) => {
                   <v-text-field v-model="inputCurrentPage" placeholder="例）25ページ → 25" />
                 </v-container>
                 <div class="d-flex justify-end my-2">
-                  <v-btn class="mx-2" color="primary" @click="addRecord(true)">OK</v-btn>
+                  <v-btn class="mx-2" color="#1F4E79" @click="addRecord(true)">OK</v-btn>
                   <v-btn class="mx-2" color="error" @click="addRecord(false)">Cancel</v-btn>
                 </div>
               </v-sheet>
