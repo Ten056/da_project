@@ -10,13 +10,13 @@
   <router-view />
 
   <v-app>
-    <v-app-bar app dark color="#424242">
+    <v-app-bar app dark color="#1F4E79">
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title>読書管理システム</v-toolbar-title>
     </v-app-bar>
     <v-navigation-drawer v-model="drawer" color="#757575">
       <v-list>
-        <v-list-item v-for="(item, i) in items" :key="i" link :to="item.url">
+        <v-list-item v-for="(item, i) in items" :key="i" link :to="item.url" @click="drawer = false">
           <v-list-item-icon>
             <v-icon>{{ item.icon }}</v-icon>
           </v-list-item-icon>

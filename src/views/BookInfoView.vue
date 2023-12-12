@@ -259,8 +259,9 @@ const addRecord = (flag) => {
       </div>
       <div class="progress-container">
         <div v-if="!isMobileView()">
-          <img src="/img/sadface.svg" class="icon" alt="Turtle" v-on:mouseover="mouseHover('t')"
-            v-on:mouseleave="mouseLeave('t')" :style="{ left: ((userData.willReadingRate - 50) * 4 - 15) + 'px' }">
+          <img v-if="bookData.unreadDays !== 0" src="/img/sadface.svg" class="icon" alt="Turtle"
+            v-on:mouseover="mouseHover('t')" v-on:mouseleave="mouseLeave('t')"
+            :style="{ left: ((userData.willReadingRate - 50) * 4 - 15) + 'px' }">
           <img src="/img/smile.svg" class="icon" alt="Rabbit" v-on:mouseover="mouseHover('r')"
             v-on:mouseleave="mouseLeave('r')" :style="{ left: ((userData.idealReadingRate - 50) * 4 - 15) + 'px' }">
         </div>
@@ -273,7 +274,7 @@ const addRecord = (flag) => {
           {{ userData.willReadingRate }} %
         </div>
         <v-progress-linear v-model="userData.reading_rate" color="#ff6384" :height="barHeight" rounded>
-          <img v-if="isMobileView()" src="/img/sadface.svg" class="icon_sm" alt="Turtle"
+          <img v-if="isMobileView() && bookData.unreadDays !== 0" src="/img/sadface.svg" class="icon_sm" alt="Turtle"
             :style="{ left: `calc(${userData.willReadingRate}% - 20px)` }">
           <img v-if="isMobileView()" src="/img/smile.svg" class="icon_sm" alt="Rabbit"
             :style="{ left: `calc(${userData.idealReadingRate}% - 20px)` }">
