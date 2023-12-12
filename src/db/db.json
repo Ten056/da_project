@@ -11,24 +11,24 @@
       "unreadDays": 15
     },
     {
-      "id": 1,
+      "startDate": "2023-12-11",
+      "deadline": "2023-12-14",
+      "unreadDays": 4,
       "thumbnail": "/1.png",
       "title": "OOUI入門",
-      "status": -1,
+      "status": 0,
       "total_page": 150,
-      "startDate": null,
-      "deadline": null,
-      "unreadDays": null
+      "id": 1
     },
     {
-      "id": 2,
+      "startDate": "2023-12-11",
+      "deadline": "",
+      "unreadDays": "",
       "thumbnail": "/2.png",
       "title": "Vueのすべて",
-      "status": 80,
+      "status": -1,
       "total_page": 120,
-      "startDate": "2023-12-01",
-      "deadline": "2023-12-30",
-      "unreadDays": 18
+      "id": 2
     },
     {
       "id": 3,
@@ -47,8 +47,9 @@
       "status": null,
       "total_page": 160,
       "startDate": null,
-      "deadline": null,
-      "unreadDays": null
+      "deadline": "2023-12-07",
+      "unreadDays": 2,
+      "id": 4
     }
   ],
   "users": [
