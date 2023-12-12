@@ -19,7 +19,6 @@ const isHoverT = ref(false)
 const dialog = ref(false)
 const inputDate = ref(getNowDate())
 const inputCurrentPage = ref(null)
-// const menu = ref("")
 
 function mouseHover(type) {
   if (type == 'r') {
@@ -134,9 +133,9 @@ function isMobileView() {
 }
 
 const fontRate = isMobileView() ? 0.7 : 1;  // スマートフォンでは80%に、それ以外では100%に設定
-// const barWidth = isMobileView() ? window.innerWidth * 0.75 : 420;  // スマートフォンでは80%に、それ以外では100%に設定
-// const circleLeft = isMobileView() ? 28 * window.innerWidth / 430 : 20;
-const barHeight = isMobileView() ? 60 : 30;
+const barWidth = isMobileView() ? window.innerWidth * 0.75 : 420;  // スマートフォンでは80%に、それ以外では100%に設定
+const circleLeft = isMobileView() ? 28 * window.innerWidth / 430 : 20;
+const barLeft = isMobileView() ? window.innerWidth * 0.05 : 40;
 
 // チャート用のデータ
 const data = (read, unread) => {
@@ -211,7 +210,7 @@ const ratioText = {
 const addRecord = (flag) => {
   if (flag) {
     console.log(inputDate)
-    const tmpBooksData = { ...bookData.value }
+    const tmpBooksData = {...bookData.value}
     console.log(tmpBooksData)
     tmpBooksData.status = inputCurrentPage.value
     updateReadingDate(tmpBooksData)
@@ -225,8 +224,15 @@ const addRecord = (flag) => {
   <h1>あなたの読書計画</h1>
   <p v-if="!isData">Loading...</p>
   <div v-else>
+    <v-progress-linear
+      model-value="100"
+      color="red-darken-2"
+      height="25"
+      width="400"
+      rounded
+    ></v-progress-linear>
     <div class="main-right-box">
-      <div class="doughnut-graph">
+      <div class="doughnut-graph" :style="{ 'margin-left': circleLeft + 'px' }">
         <Doughnut :data="data(bookData.status, bookData.total_page - bookData.status)" :options="options"
           :plugins="[ratioText]" />
       </div>
@@ -235,19 +241,21 @@ const addRecord = (flag) => {
       <div class="progress-title">
         <v-container>
           <span class="progress-title-content">計画進捗率</span>
-          <v-btn @click="dialog = true" color="#1F4E79" class="mb-2">
+          <v-btn @click="dialog = true" color="primary">
             実績入力
           </v-btn>
           <v-dialog v-model="dialog" width="80%" height="600px">
             <v-sheet>
               <v-sheet class="my-2 mx-5">
                 <h2>実績を入力してください！</h2>
-                <v-container class="ma-2 pa-2">
-                  <span>対象日</span>
-                  <v-text-field v-model="inputDate" type="date" />
-                  <span>現在のページ</span>
-                  <v-text-field v-model="inputCurrentPage" placeholder="例）25ページ → 25" />
-                </v-container>
+                <div>
+                  <label for="inputDate">対象日：</label>
+                  <input type="date" id="inputDate" name="inputDate" v-model="inputDate" />
+                </div>
+                <div>
+                  <label for="inputDate">現在のページ：</label>
+                  <input type="number" id="inputCurrentPage" placeholder="例）25ページ → 25" v-model="inputCurrentPage" />
+                </div>
                 <div class="d-flex justify-end my-2">
                   <v-btn class="mx-2" color="primary" @click="addRecord(true)">OK</v-btn>
                   <v-btn class="mx-2" color="error" @click="addRecord(false)">Cancel</v-btn>
@@ -258,27 +266,26 @@ const addRecord = (flag) => {
         </v-container>
       </div>
       <div class="progress-container">
-        <div v-if="!isMobileView()">
-          <img src="/img/sadface.svg" class="icon" alt="Turtle" v-on:mouseover="mouseHover('t')"
-            v-on:mouseleave="mouseLeave('t')" :style="{ left: ((userData.willReadingRate - 50) * 4 - 15) + 'px' }">
-          <img src="/img/smile.svg" class="icon" alt="Rabbit" v-on:mouseover="mouseHover('r')"
-            v-on:mouseleave="mouseLeave('r')" :style="{ left: ((userData.idealReadingRate - 50) * 4 - 15) + 'px' }">
+        <div class="progress-bar-outer">
+          <div class="progress-bar" :style="{ width: userData.reading_rate * barWidth / 100 + 'px' }">
+            <img src="/img/sadface.svg" class="icon" alt="Turtle" v-on:mouseover="mouseHover('t')"
+              v-on:mouseleave="mouseLeave('t')"
+              :style="{ left: (userData.willReadingRate * barWidth / 100 - barLeft) + 'px' }">
+            <div class="progress-label" :style="{ left: (userData.reading_rate * barWidth / 100 - barLeft) + 'px' }">{{
+              userData.reading_rate }} %</div>
+            <img src="/img/smile.svg" class="icon" alt="Rabbit" v-on:mouseover="mouseHover('r')"
+              v-on:mouseleave="mouseLeave('r')"
+              :style="{ left: (userData.idealReadingRate * barWidth / 100 - barLeft) + 'px' }">
+          </div>
+          <div v-if="isHoverR" class="progress-r-label"
+            :style="{ left: (userData.idealReadingRate * barWidth / 100 - barLeft) + 'px' }">
+            {{ userData.idealReadingRate }} %
+          </div>
+          <div v-if="isHoverT" class="progress-t-label"
+            :style="{ left: (userData.willReadingRate * barWidth / 100 - barLeft) + 'px' }">
+            {{ userData.willReadingRate }} %
+          </div>
         </div>
-        <div v-if="isHoverR" class="progress-r-label"
-          :style="{ left: ((userData.idealReadingRate - 50) * 4 - 30) + 'px' }">
-          {{ userData.idealReadingRate }} %
-        </div>
-        <div v-if="isHoverT" class="progress-t-label"
-          :style="{ left: ((userData.willReadingRate - 50) * 4 - 30) + 'px' }">
-          {{ userData.willReadingRate }} %
-        </div>
-        <v-progress-linear v-model="userData.reading_rate" color="#ff6384" :height="barHeight" rounded>
-          <img v-if="isMobileView()" src="/img/sadface.svg" class="icon_sm" alt="Turtle"
-            :style="{ left: `calc(${userData.willReadingRate}% - 20px)` }">
-          <img v-if="isMobileView()" src="/img/smile.svg" class="icon_sm" alt="Rabbit"
-            :style="{ left: `calc(${userData.idealReadingRate}% - 20px)` }">
-          <strong class="rate">{{ userData.reading_rate }}%</strong>
-        </v-progress-linear>
         <div class="progress-info">
           <div>
             <span class="start-date">開始日<br />{{ bookData.startDate }}</span>
@@ -337,12 +344,12 @@ const addRecord = (flag) => {
 .doughnut-graph {
   width: 400px;
   height: 400px;
-  margin: auto;
-  margin-top: 10px;
+  position: absolute;
+  margin-left: 15px;
 }
 
 .main-right-box {
-  top: 450px;
+  top: 480px;
   left: 53%;
   padding: 10px;
   margin-top: 10px;
@@ -381,14 +388,14 @@ const addRecord = (flag) => {
 .progress-container {
   width: 420px;
   padding: 10px;
-  margin-top: 20px;
-  overflow: visible;
+  margin-top: 80px;
 }
 
 .progress-title {
   margin-top: 10px;
   font-size: 30px;
   align-items: center;
+  font-family: 'Robot';
   font-weight: 700;
   color: #666;
   text-align: center;
@@ -428,26 +435,22 @@ const addRecord = (flag) => {
 
 .progress-r-label {
   position: absolute;
+  top: -60px;
   background-color: #666;
   color: white;
   padding: 5px;
   border-radius: 10px;
-  width: 60px;
-  font-size: medium;
-  top: 60px;
-  transform: translateX(220px);
+  width: 40px;
 }
 
 .progress-t-label {
   position: absolute;
+  top: -60px;
   background-color: #666;
   color: white;
   padding: 5px;
   border-radius: 10px;
-  width: 60px;
-  font-size: medium;
-  top: 60px;
-  transform: translateX(220px);
+  width: 40px;
 }
 
 .progress-info {
@@ -460,16 +463,17 @@ const addRecord = (flag) => {
 .icon {
   position: absolute;
   width: 30px;
-  top: 95px;
-  transform: translateX(220px);
+  bottom: 20px;
 }
 
 .start-date {
+  font-family: 'Roboto';
   font-weight: 600;
   left: -30px
 }
 
 .end-date {
+  font-family: 'Roboto';
   font-weight: 600;
   left: 30px
 }
@@ -478,6 +482,7 @@ const addRecord = (flag) => {
   margin-top: 10px;
   font-size: 30px;
   align-items: center;
+  font-family: 'Robot';
   font-weight: 700;
   color: #666;
   text-align: center;
@@ -486,7 +491,7 @@ const addRecord = (flag) => {
 table {
   width: 400px;
   border-collapse: collapse;
-  margin: auto;
+  margin: 20px;
 }
 
 th,
@@ -507,53 +512,41 @@ th {
 
 /* スマートフォン用のスタイル */
 @media (max-width: 600px) {
-  .icon_sm {
-    position: absolute;
-    width: 20px;
-    /* transform: translateX(45vw); */
-    margin-bottom: 25px;
-  }
-
-  .rate {
-    margin-top: 25px;
-  }
-
   .doughnut-graph {
     width: 250px;
     height: 250px;
-    margin: auto;
     margin-top: 10px;
   }
 
 
   .sub-right-box {
-    width: 90%;
-    height: 270px;
+    width: 75%;
     left: 5%;
-    /* right: 5%; */
+    right: 5%;
     top: 170px;
-    padding: 0%;
     /* margin-top: 20px; */
     margin: 0 auto;
   }
 
   .progress-container {
     width: 100%;
-    margin-top: 20px;
+    padding: 10px;
+    margin-top: 80px;
   }
 
   .progress-title {
     margin-top: 10px;
     font-size: 30px;
     align-items: center;
+    font-family: 'Robot';
     font-weight: 700;
     color: #666;
     text-align: center;
   }
 
   .progress-title-content {
-    margin-right: 20px;
-  }
+  margin-right: 20px;
+}
 
   .progress-bar-outer {
     width: 100%;
@@ -611,51 +604,54 @@ th {
     margin-top: 15px;
   }
 
+  .icon {
+    position: absolute;
+    width: 30px;
+    bottom: 20px;
+  }
+
   .start-date {
+    font-family: 'Roboto';
     font-weight: 600;
     left: -30px
   }
 
   .end-date {
+    font-family: 'Roboto';
     font-weight: 600;
     left: 30px
   }
-
-  /* .icon {
-    position: absolute;
-    width: 20px;
-    top: 95px;
-    transform: translateX(45vw);
-  } */
 
   .table-title {
     margin-top: 10px;
     font-size: 30px;
     align-items: center;
+    font-family: 'Robot';
     font-weight: 700;
     color: #666;
   }
 
   .main-right-box {
+    width: 75%;
     height: 300px;
-    width: 90%;
     left: 5%;
-    /* right: 5%; */
+    right: 5%;
     top: 460px;
-    padding: 0%;
-    /* margin-top: 20px; */
-    margin: 0 auto;
+    margin-top: 20px;
+    margin: auto;
   }
 
   .info-left-box {
-    height: 500px;
-    width: 90%;
+    width: 75%;
+    height: 65%;
     left: 5%;
-    /* right: 5%; */
+    right: 5%;
     top: 800px;
-    padding: 0%;
-    /* margin-top: 20px; */
-    margin: 0 auto;
+    margin: auto;
+  }
+
+  .progress-container {
+    width: calc(100% - 20px);
   }
 
   .table-title,
@@ -665,6 +661,10 @@ th {
 
   table {
     width: calc(100% - 40px);
+  }
+
+  .icon {
+    width: 25px;
   }
 
   h1 {
