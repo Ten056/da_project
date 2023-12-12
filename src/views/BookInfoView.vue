@@ -1,7 +1,9 @@
 <script setup>
 import { ref } from 'vue'
 import axios from 'axios'
-import {useRoute} from "vue-router";
+import { useRoute } from "vue-router";
+// import Datepicker from '@vuepic/vue-datepicker'
+// import '@vuepic/vue-datepicker/dist/main.css'
 
 const route = useRoute();
 let str = route.path;
@@ -14,6 +16,9 @@ const bookData = ref(null)
 const isData = ref(false)
 const isHoverR = ref(false)
 const isHoverT = ref(false)
+const dialog = ref(false)
+const inputDate = ref(getNowDate())
+const inputCurrentPage = ref(null)
 
 function mouseHover(type) {
   if (type == 'r') {
@@ -88,8 +93,8 @@ function getData() {
   const userUrl = `http://localhost:3000/users/0`
 
   // data初期化
-  bookData.value = null
-  userData.value = null
+  // bookData.value = null
+  // userData.value = null
 
   axios
     .get(bookUrl)
@@ -128,8 +133,9 @@ function isMobileView() {
 }
 
 const fontRate = isMobileView() ? 0.7 : 1;  // スマートフォンでは80%に、それ以外では100%に設定
-const barWidth = isMobileView() ? window.innerWidth * 0.75 : 400;  // スマートフォンでは80%に、それ以外では100%に設定
+const barWidth = isMobileView() ? window.innerWidth * 0.75 : 420;  // スマートフォンでは80%に、それ以外では100%に設定
 const circleLeft = isMobileView() ? 28 * window.innerWidth / 430 : 20;
+const barLeft = isMobileView() ? window.innerWidth * 0.05 : 40;
 
 // チャート用のデータ
 const data = (read, unread) => {
@@ -174,6 +180,13 @@ const options = {
   }
 }
 
+const updateReadingDate = (bookData) => {
+  axios.put(`http://localhost:3000/books/${id}`, bookData)
+    .then(() => {
+      getData()
+    })
+}
+
 
 
 // ドーナツチャートの中央に表示させるプラグインを定義する
@@ -194,7 +207,16 @@ const ratioText = {
   }
 }
 
-
+const addRecord = (flag) => {
+  if (flag) {
+    console.log(inputDate)
+    const tmpBooksData = {...bookData.value}
+    console.log(tmpBooksData)
+    tmpBooksData.status = inputCurrentPage.value
+    updateReadingDate(tmpBooksData)
+  }
+  dialog.value = false;
+}
 
 </script>
 
@@ -209,25 +231,51 @@ const ratioText = {
       </div>
     </div>
     <div class="sub-right-box">
-      <div class="progress-title">計画進捗率</div>
+      <div class="progress-title">
+        <v-container>
+          <span class="progress-title-content">計画進捗率</span>
+          <v-btn @click="dialog = true" color="primary">
+            実績入力
+          </v-btn>
+          <v-dialog v-model="dialog" width="80%" height="600px">
+            <v-sheet>
+              <v-sheet class="my-2 mx-5">
+                <h2>実績を入力してください！</h2>
+                <div>
+                  <label for="inputDate">対象日：</label>
+                  <input type="date" id="inputDate" name="inputDate" v-model="inputDate" />
+                </div>
+                <div>
+                  <label for="inputDate">現在のページ：</label>
+                  <input type="number" id="inputCurrentPage" placeholder="例）25ページ → 25" v-model="inputCurrentPage" />
+                </div>
+                <div class="d-flex justify-end my-2">
+                  <v-btn class="mx-2" color="primary" @click="addRecord(true)">OK</v-btn>
+                  <v-btn class="mx-2" color="error" @click="addRecord(false)">Cancel</v-btn>
+                </div>
+              </v-sheet>
+            </v-sheet>
+          </v-dialog>
+        </v-container>
+      </div>
       <div class="progress-container">
         <div class="progress-bar-outer">
           <div class="progress-bar" :style="{ width: userData.reading_rate * barWidth / 100 + 'px' }">
             <img src="/img/sadface.svg" class="icon" alt="Turtle" v-on:mouseover="mouseHover('t')"
               v-on:mouseleave="mouseLeave('t')"
-              :style="{ left: (userData.willReadingRate * barWidth / 100 - 20) + 'px' }">
-            <div class="progress-label" :style="{ left: (userData.reading_rate * barWidth / 100 - 25) + 'px' }">{{
+              :style="{ left: (userData.willReadingRate * barWidth / 100 - barLeft) + 'px' }">
+            <div class="progress-label" :style="{ left: (userData.reading_rate * barWidth / 100 - barLeft) + 'px' }">{{
               userData.reading_rate }} %</div>
             <img src="/img/smile.svg" class="icon" alt="Rabbit" v-on:mouseover="mouseHover('r')"
               v-on:mouseleave="mouseLeave('r')"
-              :style="{ left: (userData.idealReadingRate * barWidth / 100 - 20) + 'px' }">
+              :style="{ left: (userData.idealReadingRate * barWidth / 100 - barLeft) + 'px' }">
           </div>
           <div v-if="isHoverR" class="progress-r-label"
-            :style="{ left: (userData.idealReadingRate * barWidth / 100 - 20) + 'px' }">
+            :style="{ left: (userData.idealReadingRate * barWidth / 100 - barLeft) + 'px' }">
             {{ userData.idealReadingRate }} %
           </div>
           <div v-if="isHoverT" class="progress-t-label"
-            :style="{ left: (userData.willReadingRate * barWidth / 100 - 20) + 'px' }">
+            :style="{ left: (userData.willReadingRate * barWidth / 100 - barLeft) + 'px' }">
             {{ userData.willReadingRate }} %
           </div>
         </div>
@@ -344,6 +392,10 @@ const ratioText = {
   font-weight: 700;
   color: #666;
   text-align: center;
+}
+
+.progress-title-content {
+  margin-right: 50px;
 }
 
 .progress-bar-outer {
@@ -485,6 +537,10 @@ th {
     text-align: center;
   }
 
+  .progress-title-content {
+  margin-right: 20px;
+}
+
   .progress-bar-outer {
     width: 100%;
     height: 20px;
@@ -499,7 +555,7 @@ th {
     width: 100%;
     background-color: rgb(255, 99, 132);
     height: 18.5px;
-    position: relative;
+    /* position: relative; */
     border-radius: 9px;
   }
 
@@ -575,7 +631,7 @@ th {
     right: 5%;
     top: 460px;
     margin-top: 20px;
-    margin:auto;
+    margin: auto;
   }
 
   .info-left-box {
@@ -584,7 +640,7 @@ th {
     left: 5%;
     right: 5%;
     top: 800px;
-    margin:auto;
+    margin: auto;
   }
 
   .progress-container {
