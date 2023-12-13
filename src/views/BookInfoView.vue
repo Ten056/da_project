@@ -1,340 +1,383 @@
-<script setup>
-import { ref } from 'vue'
+<script>
 import axios from 'axios'
-import { useRoute } from "vue-router";
-// import Datepicker from '@vuepic/vue-datepicker'
-// import '@vuepic/vue-datepicker/dist/main.css'
-
-const route = useRoute();
-let str = route.path;
-let lastSlash = str.lastIndexOf('/');
-let id = str.substring(lastSlash + 1);
-console.log(id);
-
-const userData = ref(null)
-const bookData = ref(null)
-const isData = ref(false)
-const isHoverR = ref(false)
-const isHoverT = ref(false)
-const dialog = ref(false)
-const inputDate = ref(getNowDate())
-const inputCurrentPage = ref(null)
-// const menu = ref("")
-
-function mouseHover(type) {
-  if (type == 'r') {
-    isHoverR.value = true
-  } else {
-    isHoverT.value = true
-  }
-}
-
-function mouseLeave(type) {
-  if (type == 'r') {
-    isHoverR.value = false
-  } else {
-    isHoverT.value = false
-  }
-}
-
-function getNowDate() {
-  const dt = new Date()
-  const y = dt.getFullYear()
-  const m = ("00" + (dt.getMonth() + 1)).slice(-2)
-  const d = ("00" + dt.getDate()).slice(-2)
-  const result = y + '-' + m + '-' + d
-  return result
-}
-
-function calcReadingRate(status, total_page) {
-  return Math.round(100 * status / total_page)
-}
-
-function getDaysBetweenDate(dateStr1, dateStr2) {
-  // 日付文字列をDateオブジェクトに変換
-  const date1 = new Date(dateStr1)
-  const date2 = new Date(dateStr2)
-
-  // ミリ秒単位で差を求める
-  const diff = Math.abs(date1.getTime() - date2.getTime())
-  // ミリ秒を日数に変換
-  const diffDays = diff / (1000 * 60 * 60 * 24) + 1
-  console.log(diffDays)
-  return diffDays
-}
-
-function getIdealReadingRate() {
-  // 開始日から読了予定日までの日数
-  let diffAllDays = getDaysBetweenDate(bookData.value.startDate, bookData.value.deadline)
-
-  // 開始日から今日までの日数
-  let diffToday = getDaysBetweenDate(bookData.value.startDate, userData.value.today)
-
-  if (diffAllDays <= diffToday) { // 予定では終了している場合
-    userData.value.willReadingRate = 100
-  } else {
-    // 理想の進捗率を代入
-    userData.value.willReadingRate = Math.round(100 * diffToday / diffAllDays)
-  }
-
-  // 読めない日数を引く
-  diffAllDays -= bookData.value.unreadDays
-
-  if (diffAllDays <= diffToday) { // 理想では終了している場合
-    userData.value.idealReadingRate = 100
-  } else {
-    // 理想の進捗率を代入
-    userData.value.idealReadingRate = Math.round(100 * diffToday / diffAllDays)
-  }
-}
-
-function getData() {
-  // apiのURL
-  const bookUrl = `http://localhost:3000/books/${id}`
-  const userUrl = `http://localhost:3000/users/0`
-
-  // data初期化
-  // bookData.value = null
-  // userData.value = null
-
-  axios
-    .get(bookUrl)
-    .then((res) => {
-      bookData.value = res.data
-      return res.data
-    })
-    .then((data) => {// bookの情報を使うためthenを利用
-      axios
-        .get(userUrl)
-        .then((res) => {
-          userData.value = res.data
-          userData.value.reading_rate = calcReadingRate(data.status, data.total_page)
-          userData.value.today = getNowDate()
-        })
-        .then(() => {
-          getIdealReadingRate()
-        })
-        .then(() => {
-          isData.value = true
-        })
-    })
-    .catch((error) => bookData.value = error)
-}
-
-getData()
-
-
 import { Chart as ChartJS, ArcElement, Tooltip, Title, Legend } from 'chart.js'
 import { Doughnut } from 'vue-chartjs'
-ChartJS.register(ArcElement, Tooltip, Title, Legend)
+import { ref, computed, onMounted, watchEffect } from 'vue'
+import { useRoute } from "vue-router";
 
+export default {
+  name: "bookInfo",
+  components: {
+    Doughnut
+  },
+  setup() {
+    const route = useRoute();
+    const str = route.path;
+    const lastSlash = str.lastIndexOf('/');
+    const id = str.substring(lastSlash + 1);
 
-function isMobileView() {
-  return window.innerWidth <= 600;  // 600pxをスマートフォンの閾値とします。
-}
+    const userData = ref(null)
+    const bookData = ref(null)
+    const isData = ref(false)
+    const isHoverR = ref(false)
+    const isHoverT = ref(false)
+    const dialog = ref(false)
+    const inputDate = ref(getNowDate())
+    const inputCurrentPage = ref(null)
 
-const fontRate = isMobileView() ? 0.7 : 1;  // スマートフォンでは80%に、それ以外では100%に設定
-// const barWidth = isMobileView() ? window.innerWidth * 0.75 : 420;  // スマートフォンでは80%に、それ以外では100%に設定
-// const circleLeft = isMobileView() ? 28 * window.innerWidth / 430 : 20;
-const barHeight = isMobileView() ? 60 : 30;
+    function getNowDate() {
+      const dt = new Date()
+      const y = dt.getFullYear()
+      const m = ("00" + (dt.getMonth() + 1)).slice(-2)
+      const d = ("00" + dt.getDate()).slice(-2)
+      const result = y + '-' + m + '-' + d
+      return result
+    }
 
-// チャート用のデータ
-const data = (read, unread) => {
-  return {
-    labels: [
-      '読んだページ数',
-      '残りページ数'
-    ],
-    datasets: [{
-      data: [read, unread],
-      backgroundColor: [
-        'rgb(255, 99, 132)',
-        'rgb(255, 222, 244)'
-      ],
-    }]
-  }
-};
-
-// チャート描画のオプション
-const options = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    title: {
-      display: true,
-      text: 'この本の読了率',
-      font: {
-        weight: 'bold',
-        size: 30 * fontRate
-      },
-    },
-    legend: {
-      display: false,
-      position: 'bottom',
-      reverse: true,
-      labels: {
-        font: {
-          size: 20
-        }
+    function mouseHover(type) {
+      if (type == 'r') {
+        isHoverR.value = true
+      } else {
+        isHoverT.value = true
       }
-    },
-  }
-}
+    }
 
-const updateReadingDate = (bookData) => {
-  axios.put(`http://localhost:3000/books/${id}`, bookData)
-    .then(() => {
+    function mouseLeave(type) {
+      if (type == 'r') {
+        isHoverR.value = false
+      } else {
+        isHoverT.value = false
+      }
+    }
+
+    function calcReadingRate(status, total_page) {
+      return Math.round(100 * status / total_page)
+    }
+
+    function getDaysBetweenDate(dateStr1, dateStr2) {
+      // 日付文字列をDateオブジェクトに変換
+      const date1 = new Date(dateStr1)
+      const date2 = new Date(dateStr2)
+
+      // ミリ秒単位で差を求める
+      const diff = Math.abs(date1.getTime() - date2.getTime())
+      // ミリ秒を日数に変換
+      const diffDays = diff / (1000 * 60 * 60 * 24) + 1
+      console.log(diffDays)
+      return diffDays
+    }
+
+    function getIdealReadingRate() {
+      // 開始日から読了予定日までの日数
+      let diffAllDays = getDaysBetweenDate(bookData.value.startDate, bookData.value.deadline)
+
+      // 開始日から今日までの日数
+      let diffToday = getDaysBetweenDate(bookData.value.startDate, userData.value.today)
+
+      if (diffAllDays <= diffToday) { // 予定では終了している場合
+        userData.value.willReadingRate = 100
+      } else {
+        // 理想の進捗率を代入
+        userData.value.willReadingRate = Math.round(100 * diffToday / diffAllDays)
+      }
+
+      // 読めない日数を引く
+      diffAllDays -= bookData.value.unreadDays
+
+      if (diffAllDays <= diffToday) { // 理想では終了している場合
+        userData.value.idealReadingRate = 100
+      } else {
+        // 理想の進捗率を代入
+        userData.value.idealReadingRate = Math.round(100 * diffToday / diffAllDays)
+      }
+    }
+
+    function getData() {
+      // apiのURL
+      const bookUrl = `http://localhost:3000/books/${id}`
+      const userUrl = `http://localhost:3000/users/0`
+
+      // data初期化
+      // bookData.value = null
+      // userData.value = null
+
+      axios
+        .get(bookUrl)
+        .then((res) => {
+          bookData.value = res.data
+          return res.data
+        })
+        .then((data) => {// bookの情報を使うためthenを利用
+          axios
+            .get(userUrl)
+            .then((res) => {
+              userData.value = res.data
+              userData.value.reading_rate = calcReadingRate(data.status, data.total_page)
+              userData.value.today = getNowDate()
+            })
+            .then(() => {
+              getIdealReadingRate()
+            })
+            .then(() => {
+              isData.value = true
+            })
+        })
+        .catch((error) => bookData.value = error)
+    }
+
+    // リアクティブなプロパティ
+    const windowWidth = ref(window.innerWidth);
+
+    // ウィンドウサイズの変更を監視
+    watchEffect(() => {
+      windowWidth.value = window.innerWidth;
+    });
+
+    // メソッド
+    function isMobileView() {
+      return windowWidth.value <= 600;
+    }
+
+    // コンピューテッドプロパティ
+    const fontRate = isMobileView() ? 0.7 : 1;
+    const barHeight = computed(() => isMobileView() ? 60 : 30);
+
+    // チャート用のデータとオプション
+    const data = (read, unread) => {
+      return {
+        labels: [
+          '読んだページ数',
+          '残りページ数'
+        ],
+        datasets: [{
+          data: [read, unread],
+          backgroundColor: [
+            'rgb(255, 99, 132)',
+            'rgb(255, 222, 244)'
+          ],
+        }]
+      }
+    };
+
+    const options = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        title: {
+          display: true,
+          text: 'この本の読了率',
+          font: {
+            weight: 'bold',
+            size: 30 * fontRate
+          },
+        },
+        legend: {
+          display: false,
+          position: 'bottom',
+          reverse: true,
+          labels: {
+            font: {
+              size: 20
+            }
+          }
+        },
+      }
+    };
+
+    const updateReadingDate = (bookData) => {
+      axios.put(`http://localhost:3000/books/${id}`, bookData)
+        .then(() => {
+          getData()
+        })
+    }
+
+
+
+    // ドーナツチャートの中央に表示させるプラグインを定義する
+    const ratioText = {
+      id: 'ratio-text',
+      beforeDraw(chart) {
+        const { ctx, chartArea: { top, width, height } } = chart
+        ctx.save()
+        //チャート描画部分の中央を指定
+        ctx.fillRect(width / 2, top + (height / 2), 0, 0)
+        //フォントのスタイル指定
+        ctx.font = `bold ${50 * fontRate}px Roboto`
+        ctx.fillStyle = '#333333'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        //80%という文字列をドーナツチャートの中央部に描画します
+        ctx.fillText(userData.value.reading_rate + '%', width / 2, top + (height / 2))
+      }
+    }
+
+    const addRecord = (flag) => {
+      if (flag) {
+        console.log(inputDate)
+        const tmpBooksData = { ...bookData.value }
+        console.log(tmpBooksData)
+        tmpBooksData.status = inputCurrentPage.value
+        updateReadingDate(tmpBooksData)
+      }
+      dialog.value = false;
+    }
+
+    onMounted(() => {
       getData()
+      ChartJS.register(ArcElement, Tooltip, Title, Legend)
     })
-}
 
-
-
-// ドーナツチャートの中央に表示させるプラグインを定義する
-const ratioText = {
-  id: 'ratio-text',
-  beforeDraw(chart) {
-    const { ctx, chartArea: { top, width, height } } = chart
-    ctx.save()
-    //チャート描画部分の中央を指定
-    ctx.fillRect(width / 2, top + (height / 2), 0, 0)
-    //フォントのスタイル指定
-    ctx.font = `bold ${50 * fontRate}px Roboto`
-    ctx.fillStyle = '#333333'
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'middle'
-    //80%という文字列をドーナツチャートの中央部に描画します
-    ctx.fillText(userData.value.reading_rate + '%', width / 2, top + (height / 2))
+    return {
+      // テンプレート内で使用するプロパティやメソッドを返します
+      userData,
+      bookData,
+      isData,
+      isHoverR,
+      isHoverT,
+      dialog,
+      inputDate,
+      inputCurrentPage,
+      mouseHover,
+      mouseLeave,
+      getNowDate,
+      calcReadingRate,
+      getDaysBetweenDate,
+      getIdealReadingRate,
+      getData,
+      isMobileView,
+      data,
+      options,
+      updateReadingDate,
+      ratioText,
+      addRecord,
+      barHeight
+    }
   }
 }
-
-const addRecord = (flag) => {
-  if (flag) {
-    console.log(inputDate)
-    const tmpBooksData = { ...bookData.value }
-    console.log(tmpBooksData)
-    tmpBooksData.status = inputCurrentPage.value
-    updateReadingDate(tmpBooksData)
-  }
-  dialog.value = false;
-}
-
 </script>
+
 
 <template>
   <h1>あなたの読書計画</h1>
-  <p v-if="!isData">Loading...</p>
-  <div v-else>
-    <div class="main-right-box">
-      <div class="doughnut-graph">
-        <Doughnut :data="data(bookData.status, bookData.total_page - bookData.status)" :options="options"
-          :plugins="[ratioText]" />
+  <div class="parent">
+    <p v-if="!isData">Loading...</p>
+    <div v-else>
+      <div class="main-right-box">
+        <div class="doughnut-graph">
+          <Doughnut :data="data(bookData.status, bookData.total_page - bookData.status)" :options="options"
+            :plugins="[ratioText]" />
+        </div>
       </div>
-    </div>
-    <div class="sub-right-box">
-      <div class="progress-title">
-        <v-container>
-          <span class="progress-title-content">計画進捗率</span>
-          <v-btn @click="dialog = true" color="#1F4E79" class="mb-2">
-            実績入力
-          </v-btn>
-          <v-dialog v-model="dialog" width="80%" height="600px">
-            <v-sheet>
-              <v-sheet class="my-2 mx-5">
-                <h2>実績を入力してください！</h2>
-                <v-container class="ma-2 pa-2">
-                  <span>対象日</span>
-                  <v-text-field v-model="inputDate" type="date" />
-                  <span>現在のページ</span>
-                  <v-text-field v-model="inputCurrentPage" placeholder="例）25ページ → 25" />
-                </v-container>
-                <div class="d-flex justify-end my-2">
-                  <v-btn class="mx-2" color="#1F4E79" @click="addRecord(true)">OK</v-btn>
-                  <v-btn class="mx-2" color="error" @click="addRecord(false)">Cancel</v-btn>
-                </div>
+      <div class="sub-right-box">
+        <div class="progress-title">
+          <v-container>
+            <span class="progress-title-content">計画進捗率</span>
+            <v-btn @click="dialog = true" color="#1F4E79" class="mb-2">
+              実績入力
+            </v-btn>
+            <v-dialog v-model="dialog" width="80%" height="600px">
+              <v-sheet>
+                <v-sheet class="my-2 mx-5">
+                  <h2>実績を入力してください！</h2>
+                  <v-container class="ma-2 pa-2">
+                    <span>対象日</span>
+                    <v-text-field v-model="inputDate" type="date" />
+                    <span>現在のページ</span>
+                    <v-text-field v-model="inputCurrentPage" placeholder="例）25ページ → 25" />
+                  </v-container>
+                  <div class="d-flex justify-end my-2">
+                    <v-btn class="mx-2" color="#1F4E79" @click="addRecord(true)">OK</v-btn>
+                    <v-btn class="mx-2" color="error" @click="addRecord(false)">Cancel</v-btn>
+                  </div>
+                </v-sheet>
               </v-sheet>
-            </v-sheet>
-          </v-dialog>
-        </v-container>
-      </div>
-      <div class="progress-container">
-        <div v-if="!isMobileView()">
-          <img v-if="bookData.unreadDays !== 0" src="/img/sadface.svg" class="icon" alt="Turtle"
-            v-on:mouseover="mouseHover('t')" v-on:mouseleave="mouseLeave('t')"
-            :style="{ left: ((userData.willReadingRate - 50) * 4 - 15) + 'px' }">
-          <img src="/img/smile.svg" class="icon" alt="Rabbit" v-on:mouseover="mouseHover('r')"
-            v-on:mouseleave="mouseLeave('r')" :style="{ left: ((userData.idealReadingRate - 50) * 4 - 15) + 'px' }">
+            </v-dialog>
+          </v-container>
         </div>
-        <div v-if="isHoverR" class="progress-r-label"
-          :style="{ left: ((userData.idealReadingRate - 50) * 4 - 30) + 'px' }">
-          {{ userData.idealReadingRate }} %
-        </div>
-        <div v-if="isHoverT" class="progress-t-label"
-          :style="{ left: ((userData.willReadingRate - 50) * 4 - 30) + 'px' }">
-          {{ userData.willReadingRate }} %
-        </div>
-        <v-progress-linear v-model="userData.reading_rate" color="#ff6384" :height="barHeight" rounded>
-          <img v-if="isMobileView() && bookData.unreadDays !== 0" src="/img/sadface.svg" class="icon_sm" alt="Turtle"
-            :style="{ left: `calc(${userData.willReadingRate}% - 20px)` }">
-          <img v-if="isMobileView()" src="/img/smile.svg" class="icon_sm" alt="Rabbit"
-            :style="{ left: `calc(${userData.idealReadingRate}% - 20px)` }">
-          <strong class="rate">{{ userData.reading_rate }}%</strong>
-        </v-progress-linear>
-        <div class="progress-info">
-          <div>
-            <span class="start-date">開始日<br />{{ bookData.startDate }}</span>
+        <div class="progress-container">
+          <div v-if="!isMobileView()">
+            <img v-if="bookData.unreadDays !== 0" src="/img/sadface.svg" class="icon" alt="Turtle"
+              v-on:mouseover="mouseHover('t')" v-on:mouseleave="mouseLeave('t')"
+              :style="{ left: ((userData.willReadingRate - 50) * 4 - 15) + 'px' }">
+            <img src="/img/smile.svg" class="icon" alt="Rabbit" v-on:mouseover="mouseHover('r')"
+              v-on:mouseleave="mouseLeave('r')" :style="{ left: ((userData.idealReadingRate - 50) * 4 - 15) + 'px' }">
           </div>
-          <div>
-            <span class="end-date">読了日<br />{{ bookData.deadline }}</span>
+          <div v-if="isHoverR" class="progress-r-label"
+            :style="{ left: ((userData.idealReadingRate - 50) * 4 - 30) + 'px' }">
+            {{ userData.idealReadingRate }} %
+          </div>
+          <div v-if="isHoverT" class="progress-t-label"
+            :style="{ left: ((userData.willReadingRate - 50) * 4 - 30) + 'px' }">
+            {{ userData.willReadingRate }} %
+          </div>
+          <v-progress-linear v-model="userData.reading_rate" color="#ff6384" :height="barHeight" rounded>
+            <img v-if="isMobileView() && bookData.unreadDays !== 0" src="/img/sadface.svg" class="icon_sm" alt="Turtle"
+              :style="{ left: `calc(${userData.willReadingRate}% - 20px)` }">
+            <img v-if="isMobileView()" src="/img/smile.svg" class="icon_sm" alt="Rabbit"
+              :style="{ left: `calc(${userData.idealReadingRate}% - 20px)` }">
+            <strong class="rate">{{ userData.reading_rate }}%</strong>
+          </v-progress-linear>
+          <div class="progress-info">
+            <div>
+              <span class="start-date">開始日<br />{{ bookData.startDate }}</span>
+            </div>
+            <div>
+              <span class="end-date">読了日<br />{{ bookData.deadline }}</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="info-left-box">
-      <div class="table-title">情報</div>
-      <table>
-        <tr>
-          <td>本のタイトル</td>
-          <td class="td-left">「{{ bookData.title }}」</td>
-        </tr>
-        <tr>
-          <td>総ページ数</td>
-          <td class="td-left">{{ bookData.total_page }}ページ</td>
-        </tr>
-        <tr>
-          <td>読んだページ数</td>
-          <td class="td-left">{{ bookData.status }}ページ</td>
-        </tr>
-        <tr>
-          <td>読書開始日</td>
-          <td class="td-left">{{ bookData.startDate }}</td>
-        </tr>
-        <tr>
-          <td>読了予定日</td>
-          <td class="td-left">{{ bookData.deadline }}</td>
-        </tr>
-        <tr>
-          <td>読めない日数</td>
-          <td class="td-left">{{ bookData.unreadDays }}日</td>
-        </tr>
-        <tr>
-          <td>読了率</td>
-          <td class="td-left">{{ userData.reading_rate }}％</td>
-        </tr>
-        <tr>
-          <td>理想の進捗率</td>
-          <td class="td-left">{{ userData.idealReadingRate }}％</td>
-        </tr>
-        <tr>
-          <td>最低限の進捗率</td>
-          <td class="td-left">{{ userData.willReadingRate }}％</td>
-        </tr>
-      </table>
+      <div class="info-left-box">
+        <div class="table-title">情報</div>
+        <table>
+          <tr>
+            <td>本のタイトル</td>
+            <td class="td-left">「{{ bookData.title }}」</td>
+          </tr>
+          <tr>
+            <td>総ページ数</td>
+            <td class="td-left">{{ bookData.total_page }}ページ</td>
+          </tr>
+          <tr>
+            <td>読んだページ数</td>
+            <td class="td-left">{{ bookData.status }}ページ</td>
+          </tr>
+          <tr>
+            <td>読書開始日</td>
+            <td class="td-left">{{ bookData.startDate }}</td>
+          </tr>
+          <tr>
+            <td>読了予定日</td>
+            <td class="td-left">{{ bookData.deadline }}</td>
+          </tr>
+          <tr>
+            <td>読めない日数</td>
+            <td class="td-left">{{ bookData.unreadDays }}日</td>
+          </tr>
+          <tr>
+            <td>読了率</td>
+            <td class="td-left">{{ userData.reading_rate }}％</td>
+          </tr>
+          <tr>
+            <td>理想の進捗率</td>
+            <td class="td-left">{{ userData.idealReadingRate }}％</td>
+          </tr>
+          <tr>
+            <td>最低限の進捗率</td>
+            <td class="td-left">{{ userData.willReadingRate }}％</td>
+          </tr>
+        </table>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.parent {
+  z-index: 1000;
+  height: 100vh;
+}
+
 .doughnut-graph {
   width: 400px;
   height: 400px;

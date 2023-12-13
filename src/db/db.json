@@ -4,29 +4,29 @@
       "id": 0,
       "thumbnail": "/0.png",
       "title": "json-server",
-      "status": "57",
+      "status": "100",
       "total_page": 100,
       "startDate": "2023-12-01",
       "deadline": "2023-12-20",
-      "unreadDays": 15
+      "unreadDays": 6
     },
     {
-      "startDate": "2023-12-12",
+      "startDate": "2023-12-13",
       "deadline": "2023-12-29",
-      "unreadDays": "8",
+      "unreadDays": "6",
       "thumbnail": "/1.png",
       "title": "OOUI入門",
-      "status": 0,
+      "status": "17",
       "total_page": 150,
       "id": 1
     },
     {
-      "startDate": "2023-12-12",
-      "deadline": "2023-12-13",
+      "startDate": "2023-12-13",
+      "deadline": "2023-12-20",
       "unreadDays": 0,
       "thumbnail": "/2.png",
       "title": "Vueのすべて",
-      "status": 0,
+      "status": "12",
       "total_page": 120,
       "id": 2
     },
@@ -34,7 +34,7 @@
       "id": 3,
       "thumbnail": "/3.png",
       "title": "分かる！JavaScript",
-      "status": null,
+      "status": -1,
       "total_page": 60,
       "startDate": null,
       "deadline": null,
@@ -46,7 +46,7 @@
       "unreadDays": "3",
       "thumbnail": "/4.png",
       "title": "インフラエンジニア入門",
-      "status": 0,
+      "status": -1,
       "total_page": 160,
       "id": 4
     }

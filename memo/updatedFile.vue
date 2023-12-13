@@ -57,7 +57,7 @@ export default {
       // 日付文字列をDateオブジェクトに変換
       const date1 = new Date(dateStr1)
       const date2 = new Date(dateStr2)
-    
+
       // ミリ秒単位で差を求める
       const diff = Math.abs(date1.getTime() - date2.getTime())
       // ミリ秒を日数に変換
@@ -65,24 +65,24 @@ export default {
       console.log(diffDays)
       return diffDays
     }
-    
+
     function getIdealReadingRate() {
       // 開始日から読了予定日までの日数
       let diffAllDays = getDaysBetweenDate(bookData.value.startDate, bookData.value.deadline)
-    
+
       // 開始日から今日までの日数
       let diffToday = getDaysBetweenDate(bookData.value.startDate, userData.value.today)
-    
+
       if (diffAllDays <= diffToday) { // 予定では終了している場合
         userData.value.willReadingRate = 100
       } else {
         // 理想の進捗率を代入
         userData.value.willReadingRate = Math.round(100 * diffToday / diffAllDays)
       }
-    
+
       // 読めない日数を引く
       diffAllDays -= bookData.value.unreadDays
-    
+
       if (diffAllDays <= diffToday) { // 理想では終了している場合
         userData.value.idealReadingRate = 100
       } else {
@@ -90,16 +90,16 @@ export default {
         userData.value.idealReadingRate = Math.round(100 * diffToday / diffAllDays)
       }
     }
-    
+
     function getData() {
       // apiのURL
       const bookUrl = `http://localhost:3000/books/${id}`
       const userUrl = `http://localhost:3000/users/0`
-    
+
       // data初期化
       // bookData.value = null
       // userData.value = null
-    
+
       axios
         .get(bookUrl)
         .then((res) => {
@@ -167,7 +167,7 @@ export default {
           text: 'この本の読了率',
           font: {
             weight: 'bold',
-            size: 30 * fontRate
+            size: 30 * this.fontRate
           },
         },
         legend: {
@@ -189,9 +189,9 @@ export default {
           getData()
         })
     }
-    
-    
-    
+
+
+
     // ドーナツチャートの中央に表示させるプラグインを定義する
     const ratioText = {
       id: 'ratio-text',
@@ -201,7 +201,7 @@ export default {
         //チャート描画部分の中央を指定
         ctx.fillRect(width / 2, top + (height / 2), 0, 0)
         //フォントのスタイル指定
-        ctx.font = `bold ${50 * fontRate}px Roboto`
+        ctx.font = `bold ${50 * this.fontRate}px Roboto`
         ctx.fillStyle = '#333333'
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
@@ -209,7 +209,7 @@ export default {
         ctx.fillText(userData.value.reading_rate + '%', width / 2, top + (height / 2))
       }
     }
-    
+
     const addRecord = (flag) => {
       if (flag) {
         console.log(inputDate)
@@ -221,17 +221,9 @@ export default {
       dialog.value = false;
     }
 
-    // その他のメソッド
-    function updateReadingDate(bookData) {
-      // ...
-    }
-
-    function addRecord(flag) {
-      // ...
-    }
-
     onMounted(() => {
       getData()
+      ChartJS.register(ArcElement, Tooltip, Title, Legend)
     })
 
     return {
@@ -256,7 +248,9 @@ export default {
       options,
       updateReadingDate,
       ratioText,
-      addRecord
+      addRecord,
+      barHeight,
+      fontRate
     }
   }
 }

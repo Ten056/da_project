@@ -3,20 +3,20 @@
     <!-- <router-link to="/">Home</router-link> |
     <router-link to="/about">About</router-link> |
     <router-link to="/test">Test</router-link> | -->
-    <router-link to="/booklist">BookList</router-link>
+    <!-- <router-link to="/booklist">BookList</router-link> -->
     <!-- <router-link to="/bookInfo/0">本の計画</router-link> -->
     <br>
   </nav>
   <router-view />
 
-  <!-- <v-app>
+  <v-app>
     <v-app-bar app dark color="#1F4E79">
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-      <v-toolbar-title>読書管理システム</v-toolbar-title>
+      <v-toolbar-title><router-link class="routerLink" to="/booklist">読書管理システム</router-link></v-toolbar-title>
     </v-app-bar>
     <v-navigation-drawer v-model="drawer" color="#757575">
       <v-list>
-        <v-list-item v-for="(item, i) in items" :key="i" link :to="item.url">
+        <v-list-item v-for="(item, i) in items" :key="i" link :to="item.url" @click="drawer = false">
           <v-list-item-icon>
             <v-icon>{{ item.icon }}</v-icon>
           </v-list-item-icon>
@@ -26,10 +26,10 @@
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
-  </v-app> -->
+  </v-app>
 </template>
 
-<!-- <script>
+<script>
 export default {
   name: 'App',
   data: () => ({
@@ -37,11 +37,11 @@ export default {
     items: [
       // { title: 'Home', icon: 'mdi-home' },
       { title: 'Book List', icon: 'mdi-book-open-page-variant', url: "/booklist" },
-      { title: 'Ranking', icon: 'mdi-trophy-outline', url: "/about" },
+      // { title: 'Ranking', icon: 'mdi-trophy-outline', url: "/about" },
     ],
   }),
 };
-</script> -->
+</script>
 
 <style>
 #app {
@@ -62,6 +62,12 @@ nav a {
 }
 
 nav a.router-link-exact-active {
-  color: #42b983;
+  color: #eeeeee;
+}
+
+.routerLink {
+  color: aliceblue;
+  text-decoration: none;
+  justify-content: center;
 }
 </style>
