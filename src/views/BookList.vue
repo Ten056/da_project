@@ -44,7 +44,7 @@
               <p style="text-align:left" v-if="data.status !== -1">{{ data.deadline }}<span
                   v-if="(isDanger[data.id] == true || isCaution[data.id] == true) && data.isHover" class="restDays">
                   残り {{ Math.ceil((Date.parse(data.deadline) - nowDate) / 1000 / 60 / 60 / 24) + '日' }}</span> </p>
-              <p v-if="data.status === -1"> </p>
+              <p v-if="data.status == -1"> </p>
             </td>
 
           </tr>
@@ -76,7 +76,7 @@ export default {
         let tmpData = response.data
         for (let i = 0; i < tmpData.length; i++) {
           tmpData[i].isHover = false
-          if (tmpData[i].status === -1 || tmpData[i].total_page != tmpData[i].status)
+          if (tmpData[i].status == -1 || tmpData[i].total_page != tmpData[i].status)
             this.todoData.push(tmpData[i])
 
 
@@ -151,9 +151,9 @@ export default {
     },
     navigateTo(data) {
       console.log(data)
-      if (data.status === -1) {
+      if (data.status == -1) {
         this.$router.push({ path: `./bookInfo/${data.id}/${data.status}` });
-      } else if (data.status !== -1) {
+      } else if (data.status != -1) {
         this.$router.push({ path: `/bookInfo/${data.id}` });
       }
     }

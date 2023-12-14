@@ -85,16 +85,14 @@
       "overview": "基本情報技術者は、令和5年4月より試験制度が変わります。本書はその新試験対応の予想問題集です。"
     },
     {
-      "startDate": null,
-      "deadline": null,
-      "unreadDays": "3",
+      "startDate": "2023-12-14",
+      "deadline": "2023-12-20",
+      "unreadDays": 0,
       "thumbnail": "/7.jpg",
       "title": "徹底攻略 Microsoft Azure Fundamentals教科書[AZ-900]対応",
-      "status": "-1",
+      "status": 0,
       "total_page": 304,
-      "id": 7,
-      "average_read_days": 15,
-      "overview": "本書は、Microsoft Azure Fundamentals[AZ-900]の対策教科書です。2020年11月に更新された最新試験に対応しています。"
+      "id": 7
     },
     {
       "startDate": "2023-12-12",
@@ -186,7 +184,7 @@
       "unreadDays": 0,
       "thumbnail": "/15.jpg",
       "title": "そして、バトンは渡された",
-      "status": "45",
+      "status": "89",
       "total_page": 425,
       "id": 15,
       "average_read_days": 25,
