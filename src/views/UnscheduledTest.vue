@@ -31,8 +31,15 @@
     <div id="table_id">
       <div class="box">
         <p style="font-size: 18px; font-weight:bold;">情報</p>
-        <v-data-table :headers=none :items="boolks_table" density="compact" item-key="name"
-          class="my-table"></v-data-table>
+        <img v-bind:src='thumbnail_path' alt="icon">
+        <v-table class="my-table">
+          <tbody>
+            <tr v-for="item in boolks_table" :key="item.name">
+              <td width="150">{{ item.name }}</td>
+              <td style="text-align:left">{{ item.value }}</td>
+            </tr>
+          </tbody>
+        </v-table>
       </div>
     </div>
   </div>
@@ -53,14 +60,23 @@ export default {
     books_list: "",
     select_id: "",
     today: "",
+    thumbnail_path: "",
     boolks_table: [
       {
         name: '本のタイトル',
         value: 'title_value',
       },
       {
+        name: '概要',
+        value: 'overview_value',
+      },
+      {
         name: '総ページ数',
         value: 'totalPage_value',
+      },
+      {
+        name: '平均読了日数',
+        value: 'average_read_days_value',
       }
     ]
   }),
@@ -117,7 +133,10 @@ export default {
         this.select_id = this.route.path.slice(this.route.path.length - 4, this.route.path.length - 3)
         // 表の値を更新
         this.boolks_table[0].value = this.books_list[this.select_id].title
-        this.boolks_table[1].value = this.books_list[this.select_id].total_page
+        this.boolks_table[1].value = this.books_list[this.select_id].overview
+        this.boolks_table[2].value = String(this.books_list[this.select_id].total_page) + "ページ"
+        this.boolks_table[3].value = String(this.books_list[this.select_id].average_read_days) + "日"
+        this.thumbnail_path = this.books_list[this.select_id].thumbnail
       })
       .catch(error => console.log(error))
 
@@ -173,6 +192,10 @@ div#table_id {
   display: flex;
 }
 
+img {
+  width: 120px;
+}
+
 /* スマートフォン用のスタイル */
 @media (max-width: 600px) {
   div#mainContents {
@@ -209,6 +232,10 @@ div#table_id {
   .parent {
     display: flex;
     flex-direction: column;
+  }
+
+  img {
+    width: 120px;
   }
 }
 </style>
