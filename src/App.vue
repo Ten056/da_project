@@ -37,6 +37,7 @@ export default {
     items: [
       // { title: 'Home', icon: 'mdi-home' },
       { title: 'Book List', icon: 'mdi-book-open-page-variant', url: "/booklist" },
+      { title: 'Read List', icon: 'mdi-checkbox-marked-outline', url: "/finishReading" },
       // { title: 'Ranking', icon: 'mdi-trophy-outline', url: "/about" },
     ],
   }),
