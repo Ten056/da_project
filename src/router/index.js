@@ -38,6 +38,11 @@ const routes = [
     name: 'bookInfo_unscheduled',
     component: () => import('../views/UnscheduledTest.vue')
   },
+  {
+    path: '/finishReading',
+    name: 'finishReading',
+    component: () => import('../views/FinishReading.vue')
+  },
   // {
   //   path: '/users/:id',
   //   name: 'bookinfo_id',

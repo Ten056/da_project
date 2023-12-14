@@ -199,7 +199,7 @@ table th {
 
 img {
   width: 40px;
-  height: 40px;
+
 }
 
 .sort-asc:after {
