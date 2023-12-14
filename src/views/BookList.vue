@@ -35,9 +35,9 @@
               {{ data.title }}
             </td>
             <td v-bind:class="{ dangerClass: isDanger[data.id], cautionClass: isCaution[data.id] }">
-              <p v-if="(data.status !== -1) & (data.total_page !== data.status)">進行中</p>
-              <p v-if="(data.status !== -1) & (data.total_page === data.status)">読了済み</p>
-              <p v-if="data.status === -1">計画未作成</p>
+              <p v-if="(data.status != -1) & (data.total_page != data.status)">進行中</p>
+              <p v-if="(data.status != -1) & (data.total_page == data.status)">読了済み</p>
+              <p v-if="data.status == -1">計画未作成</p>
             </td>
 
             <td v-bind:class="{ dangerClass: isDanger[data.id], cautionClass: isCaution[data.id] }">
