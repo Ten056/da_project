@@ -24,6 +24,7 @@ export default {
     const dialog = ref(false)
     const inputDate = ref(getNowDate())
     const inputCurrentPage = ref(null)
+    const firstPage = ref(0)
 
     function getNowDate() {
       const dt = new Date()
@@ -114,12 +115,20 @@ export default {
               userData.value = res.data
               userData.value.reading_rate = calcReadingRate(data.status, data.total_page)
               userData.value.today = getNowDate()
+              inputCurrentPage.value = data.status
+              firstPage.value = data.status
             })
             .then(() => {
               getIdealReadingRate()
             })
             .then(() => {
               isData.value = true
+              if (userData.value.reading_rate === 100) {
+                startProgress()
+                loadImage()
+              } else {
+                loaded.value = false
+              }
             })
         })
         .catch((error) => bookData.value = error)
@@ -158,6 +167,11 @@ export default {
         }]
       }
     };
+
+    // バリデーション関数
+    const requiredValidation = (value) => !!value || '必ず入力してください' // 入力必須の制約
+    const limitLengthValidation = (value, maxPage) => value <= maxPage || '総ページ数を超過しています' // 文字数の制約
+    const minusLengthValidation = (value, currentPage) => value >= currentPage || '注意）現在の進捗量から減少しています' // 文字数の制約
 
     const options = {
       responsive: true,
@@ -215,11 +229,47 @@ export default {
       if (flag) {
         console.log(inputDate)
         const tmpBooksData = { ...bookData.value }
+        axios.get("http://localhost:3000/pages/0")
+          .then(response => {
+            let before_pages = response.data.pages
+            console.log(before_pages)
+            let read_pages = (inputCurrentPage.value - firstPage.value) + before_pages
+            console.log("read", read_pages)
+            let newData = {
+              id: 0,
+              pages: read_pages
+            }
+            axios.put("http://localhost:3000/pages/0", newData)
+          })
+          .catch(error => console.log(error))
         console.log(tmpBooksData)
         tmpBooksData.status = inputCurrentPage.value
         updateReadingDate(tmpBooksData)
       }
       dialog.value = false;
+    }
+
+    const testValue = ref(0)
+    const show = ref(false)
+    const balloon = ref(null)
+    const loaded = ref(false)
+
+    function startProgress() {
+      show.value = !show.value
+      let intervalId = setInterval(() => {
+        if (testValue.value >= 100) {
+          clearInterval(intervalId)
+        } else {
+          testValue.value += 5
+        }
+      }, 60)
+    }
+    function loadImage() {
+      let image = new Image();
+      image.src = '/img/smile.svg';
+      image.onload = () => {
+        loaded.value = true;
+      };
     }
 
     onMounted(() => {
@@ -250,7 +300,16 @@ export default {
       updateReadingDate,
       ratioText,
       addRecord,
-      barHeight
+      barHeight,
+      requiredValidation,
+      limitLengthValidation,
+      minusLengthValidation,
+      testValue,
+      startProgress,
+      show,
+      balloon,
+      loaded,
+      loadImage,
     }
   }
 }
@@ -259,9 +318,9 @@ export default {
 
 <template>
   <h1>あなたの読書計画</h1>
-  <div class="parent">
+  <div>
     <p v-if="!isData">Loading...</p>
-    <div v-else>
+    <div v-else class="parent">
       <div class="main-right-box">
         <div class="doughnut-graph">
           <Doughnut :data="data(bookData.status, bookData.total_page - bookData.status)" :options="options"
@@ -282,11 +341,13 @@ export default {
                   <v-container class="ma-2 pa-2">
                     <span>対象日</span>
                     <v-text-field v-model="inputDate" type="date" />
-                    <span>現在のページ</span>
-                    <v-text-field v-model="inputCurrentPage" placeholder="例）25ページ → 25" />
+                    <span>現在のページ（総ページ数：{{ bookData.total_page }}ページ）</span>
+                    <v-text-field v-model="inputCurrentPage" type="number" placeholder="例）25ページ → 25"
+                      :rules="[requiredValidation, limitLengthValidation(inputCurrentPage, bookData.total_page), minusLengthValidation(inputCurrentPage, bookData.status)]" />
                   </v-container>
                   <div class="d-flex justify-end my-2">
-                    <v-btn class="mx-2" color="#1F4E79" @click="addRecord(true)">OK</v-btn>
+                    <v-btn class="mx-2" color="#1F4E79" @click="addRecord(true)"
+                      :disabled="requiredValidation(inputCurrentPage) !== true || limitLengthValidation(inputCurrentPage, bookData.total_page) !== true">OK</v-btn>
                     <v-btn class="mx-2" color="error" @click="addRecord(false)">Cancel</v-btn>
                   </div>
                 </v-sheet>
@@ -295,27 +356,31 @@ export default {
           </v-container>
         </div>
         <div class="progress-container">
-          <div v-if="!isMobileView()">
-            <img v-if="bookData.unreadDays !== 0" src="/img/sadface.svg" class="icon" alt="Turtle"
+          <div v-if="!isMobileView() && (userData.reading_rate < 100)">
+            <img v-if="bookData.unreadDays !== 0" src="/img/arrow.png" class="icon" alt="Turtle"
               v-on:mouseover="mouseHover('t')" v-on:mouseleave="mouseLeave('t')"
-              :style="{ left: ((userData.willReadingRate - 50) * 4 - 15) + 'px' }">
-            <img src="/img/smile.svg" class="icon" alt="Rabbit" v-on:mouseover="mouseHover('r')"
-              v-on:mouseleave="mouseLeave('r')" :style="{ left: ((userData.idealReadingRate - 50) * 4 - 15) + 'px' }">
+              :style="{ left: ((userData.willReadingRate - 50) * 4 - 5) + 'px' }">
+            <img src="/img/arrow.png" class="icon" alt="Rabbit" v-on:mouseover="mouseHover('r')"
+              v-on:mouseleave="mouseLeave('r')" :style="{ left: ((userData.idealReadingRate - 50) * 4 - 5) + 'px' }">
           </div>
           <div v-if="isHoverR" class="progress-r-label"
-            :style="{ left: ((userData.idealReadingRate - 50) * 4 - 30) + 'px' }">
-            {{ userData.idealReadingRate }} %
+            :style="{ left: ((userData.idealReadingRate - 50) * 4 - 40) + 'px' }">
+            理想：{{ userData.idealReadingRate }} %
           </div>
           <div v-if="isHoverT" class="progress-t-label"
-            :style="{ left: ((userData.willReadingRate - 50) * 4 - 30) + 'px' }">
-            {{ userData.willReadingRate }} %
+            :style="{ left: ((userData.willReadingRate - 50) * 4 - 40) + 'px' }">
+            推奨：{{ userData.willReadingRate }} %
           </div>
-          <v-progress-linear v-model="userData.reading_rate" color="#ff6384" :height="barHeight" rounded>
+          <v-progress-linear v-if="userData.reading_rate < 100" v-model="userData.reading_rate" color="#ff6384"
+            :height="barHeight" rounded>
             <img v-if="isMobileView() && bookData.unreadDays !== 0" src="/img/sadface.svg" class="icon_sm" alt="Turtle"
               :style="{ left: `calc(${userData.willReadingRate}% - 20px)` }">
             <img v-if="isMobileView()" src="/img/smile.svg" class="icon_sm" alt="Rabbit"
               :style="{ left: `calc(${userData.idealReadingRate}% - 20px)` }">
             <strong class="rate">{{ userData.reading_rate }}%</strong>
+          </v-progress-linear>
+          <v-progress-linear v-if="userData.reading_rate === 100" v-model="testValue" color="#ff6384" :height="barHeight"
+            rounded>
           </v-progress-linear>
           <div class="progress-info">
             <div>
@@ -368,11 +433,39 @@ export default {
           </tr>
         </table>
       </div>
+      <div class="all">
+        <img v-if="loaded" src="/img/balloon.png" alt="Balloon" class="balloon" />
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.all {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.balloon {
+  animation-name: float;
+  animation-duration: 5s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  width: 80%;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(-100vh);
+  }
+}
+
 .parent {
   z-index: 1000;
   height: 100vh;
@@ -472,25 +565,25 @@ export default {
 
 .progress-r-label {
   position: absolute;
-  background-color: #666;
+  background-color: rgba(50, 50, 50, 0.5);
   color: white;
   padding: 5px;
   border-radius: 10px;
-  width: 60px;
+  width: 100px;
   font-size: medium;
-  top: 60px;
+  top: 75px;
   transform: translateX(220px);
 }
 
 .progress-t-label {
   position: absolute;
-  background-color: #666;
+  background-color: rgba(50, 50, 50, 0.5);
   color: white;
   padding: 5px;
   border-radius: 10px;
-  width: 60px;
+  width: 100px;
   font-size: medium;
-  top: 60px;
+  top: 75px;
   transform: translateX(220px);
 }
 
@@ -503,8 +596,8 @@ export default {
 
 .icon {
   position: absolute;
-  width: 30px;
-  top: 95px;
+  width: 10px;
+  top: 115px;
   transform: translateX(220px);
 }
 
