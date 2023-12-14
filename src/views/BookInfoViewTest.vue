@@ -210,7 +210,7 @@ const ratioText = {
 const addRecord = (flag) => {
   if (flag) {
     console.log(inputDate)
-    const tmpBooksData = {...bookData.value}
+    const tmpBooksData = { ...bookData.value }
     console.log(tmpBooksData)
     tmpBooksData.status = inputCurrentPage.value
     updateReadingDate(tmpBooksData)
@@ -224,13 +224,7 @@ const addRecord = (flag) => {
   <h1>あなたの読書計画</h1>
   <p v-if="!isData">Loading...</p>
   <div v-else>
-    <v-progress-linear
-      model-value="100"
-      color="red-darken-2"
-      height="25"
-      width="400"
-      rounded
-    ></v-progress-linear>
+    <v-progress-linear model-value="100" color="red-darken-2" height="25" width="400" rounded></v-progress-linear>
     <div class="main-right-box">
       <div class="doughnut-graph" :style="{ 'margin-left': circleLeft + 'px' }">
         <Doughnut :data="data(bookData.status, bookData.total_page - bookData.status)" :options="options"
@@ -545,8 +539,8 @@ th {
   }
 
   .progress-title-content {
-  margin-right: 20px;
-}
+    margin-right: 20px;
+  }
 
   .progress-bar-outer {
     width: 100%;
@@ -670,5 +664,7 @@ th {
   h1 {
     text-align: center;
   }
+
+
 }
 </style>
