@@ -41,8 +41,10 @@
             </td>
 
             <td v-bind:class="{ dangerClass: isDanger[data.id], cautionClass: isCaution[data.id] }">
-              <p style="text-align:left" v-if="data.status !== -1">{{ data.deadline }}<span
-                  v-if="(isDanger[data.id] == true || isCaution[data.id] == true) && data.isHover" class="restDays">
+              <p style="text-align:left"
+                v-if="data.status !== -1 && !(data.deadline == '2099-01-01' || data.deadline == '1975-01-01')">{{
+                  data.deadline }}<span v-if="(isDanger[data.id] == true || isCaution[data.id] == true) && data.isHover"
+                  class="restDays">
                   残り {{ Math.ceil((Date.parse(data.deadline) - nowDate) / 1000 / 60 / 60 / 24) + '日' }}</span> </p>
               <p v-if="data.status == -1"> </p>
             </td>
@@ -110,22 +112,19 @@ export default {
 
       if (sortKey === "deadline") {
         for (let i = 0; i < todoData_tmp.length; i++) {
-          if ((todoData_tmp[i].deadline === null || todoData_tmp[i].deadline === '1975-1-1') && sortOrder == 1) {
-            todoData_tmp[i].deadline = "2099-1-1"
-          } else if (todoData_tmp[i].deadline === null || todoData_tmp[i].deadline === '2099-1-1') {
+          if ((todoData_tmp[i].deadline === null || todoData_tmp[i].deadline === '1975-01-01') && sortOrder == 1) {
+            todoData_tmp[i].deadline = "2099-01-01"
+          } else if (todoData_tmp[i].deadline === null || todoData_tmp[i].deadline === '2099-01-01') {
 
-            todoData_tmp[i].deadline = "1975-1-1"
+            todoData_tmp[i].deadline = "1975-01-01"
           }
-        }
-        for (let i = 0; i < todoData_tmp.length; i++) {
-          console.log("dead", todoData_tmp[i].deadline)
         }
 
         todoData_tmp.sort((a, b) => {
           const modifier = sortOrder === 1 ? 1 : -1;
 
-          if (Date.parse(a[sortKey]) < Date.parse(b[sortKey])) return -1 * modifier;
-          if (Date.parse(a[sortKey]) > Date.parse(b[sortKey])) return 1 * modifier;
+          if (new Date(a[sortKey]) < new Date(b[sortKey])) return -1 * modifier;
+          if (new Date(a[sortKey]) > new Date(b[sortKey])) return 1 * modifier;
           return 0;
         })
       } else if (sortKey) {

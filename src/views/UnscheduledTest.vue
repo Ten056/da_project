@@ -88,7 +88,8 @@ export default {
       }
       try {
         // 更新するデータのIDを取得する
-        this.select_id = this.route.path.slice(this.route.path.length - 4, this.route.path.length - 3)
+        let parts = this.route.path.split('/')
+        this.select_id = parts[parts.length - 2]
         console.log(this.todoData)
 
         // axiosでdb.jsonのデータを取得し、todoDataに格納
@@ -130,7 +131,8 @@ export default {
       .then(response => {
         this.books_list = response.data;
         // データのIDを取得する
-        this.select_id = this.route.path.slice(this.route.path.length - 4, this.route.path.length - 3)
+        let parts = this.route.path.split('/')
+        this.select_id = parts[parts.length - 2]
         // 表の値を更新
         this.boolks_table[0].value = this.books_list[this.select_id].title
         this.boolks_table[1].value = this.books_list[this.select_id].overview

@@ -171,7 +171,7 @@ export default {
     // バリデーション関数
     const requiredValidation = (value) => !!value || '必ず入力してください' // 入力必須の制約
     const limitLengthValidation = (value, maxPage) => value <= maxPage || '総ページ数を超過しています' // 文字数の制約
-    const minusLengthValidation = (value, currentPage) => value >= currentPage || '注意）現在の進捗量から減少しています' // 文字数の制約
+    const minusLengthValidation = (value) => value >= firstPage.value || '注意）現在の進捗量から減少しています' // 文字数の制約
 
     const options = {
       responsive: true,
@@ -239,7 +239,9 @@ export default {
               id: 0,
               pages: read_pages
             }
-            axios.put("http://localhost:3000/pages/0", newData)
+            setTimeout(function () {
+              axios.put("http://localhost:3000/pages/0", newData)
+            }, 600);
           })
           .catch(error => console.log(error))
         console.log(tmpBooksData)
@@ -343,7 +345,7 @@ export default {
                     <v-text-field v-model="inputDate" type="date" />
                     <span>現在のページ（総ページ数：{{ bookData.total_page }}ページ）</span>
                     <v-text-field v-model="inputCurrentPage" type="number" placeholder="例）25ページ → 25"
-                      :rules="[requiredValidation, limitLengthValidation(inputCurrentPage, bookData.total_page), minusLengthValidation(inputCurrentPage, bookData.status)]" />
+                      :rules="[requiredValidation, limitLengthValidation(inputCurrentPage, bookData.total_page), minusLengthValidation]" />
                   </v-container>
                   <div class="d-flex justify-end my-2">
                     <v-btn class="mx-2" color="#1F4E79" @click="addRecord(true)"
@@ -393,45 +395,46 @@ export default {
         </div>
       </div>
       <div class="info-left-box">
-        <div class="table-title">情報</div>
-        <table>
-          <tr>
-            <td>本のタイトル</td>
-            <td class="td-left">「{{ bookData.title }}」</td>
-          </tr>
-          <tr>
-            <td>総ページ数</td>
-            <td class="td-left">{{ bookData.total_page }}ページ</td>
-          </tr>
-          <tr>
-            <td>読んだページ数</td>
-            <td class="td-left">{{ bookData.status }}ページ</td>
-          </tr>
-          <tr>
-            <td>読書開始日</td>
-            <td class="td-left">{{ bookData.startDate }}</td>
-          </tr>
-          <tr>
-            <td>読了予定日</td>
-            <td class="td-left">{{ bookData.deadline }}</td>
-          </tr>
-          <tr>
-            <td>読めない日数</td>
-            <td class="td-left">{{ bookData.unreadDays }}日</td>
-          </tr>
-          <tr>
-            <td>読了率</td>
-            <td class="td-left">{{ userData.reading_rate }}％</td>
-          </tr>
-          <tr>
-            <td>理想の進捗率</td>
-            <td class="td-left">{{ userData.idealReadingRate }}％</td>
-          </tr>
-          <tr>
-            <td>最低限の進捗率</td>
-            <td class="td-left">{{ userData.willReadingRate }}％</td>
-          </tr>
-        </table>
+        <!-- <div class="box"> -->
+        <img v-bind:src='bookData.thumbnail' alt="icon" style="width: 120px; margin-top: 6px; margin-bottom: 4px;">
+        <p style="font-size: 16px; font-weight: bold;">{{ bookData.title }}</p>
+        <v-table class="my-table">
+          <tbody>
+            <tr>
+              <td>総ページ数</td>
+              <td class="td-left">{{ bookData.total_page }}ページ</td>
+            </tr>
+            <tr>
+              <td>読んだページ数</td>
+              <td class="td-left">{{ bookData.status }}ページ</td>
+            </tr>
+            <tr>
+              <td>読書開始日</td>
+              <td class="td-left">{{ bookData.startDate }}</td>
+            </tr>
+            <tr>
+              <td>読了予定日</td>
+              <td class="td-left">{{ bookData.deadline }}</td>
+            </tr>
+            <tr>
+              <td>読めない日数</td>
+              <td class="td-left">{{ bookData.unreadDays }}日</td>
+            </tr>
+            <tr>
+              <td>読了率</td>
+              <td class="td-left">{{ userData.reading_rate }}％</td>
+            </tr>
+            <tr>
+              <td>理想の進捗率</td>
+              <td class="td-left">{{ userData.idealReadingRate }}％</td>
+            </tr>
+            <tr>
+              <td>最低限の進捗率</td>
+              <td class="td-left">{{ userData.willReadingRate }}％</td>
+            </tr>
+          </tbody>
+        </v-table>
+        <!-- </div> -->
       </div>
       <div class="all">
         <img v-if="loaded" src="/img/balloon.png" alt="Balloon" class="balloon" />
@@ -441,6 +444,14 @@ export default {
 </template>
 
 <style scoped>
+.my-table {
+  background-color: #f3f3f3;
+  margin: 1.5em 0 0 1em;
+  width: 95%;
+  position: relative;
+}
+
+
 .all {
   height: 100vh;
   display: flex;
@@ -508,8 +519,8 @@ export default {
   padding: 10px;
   margin-top: 10px;
   margin-bottom: 10px;
-  width: 440px;
-  height: 500px;
+  width: 500px;
+  height: 760px;
   border-radius: 40px;
   background-color: rgb(244, 244, 244);
   position: absolute;
@@ -620,30 +631,19 @@ export default {
   text-align: center;
 }
 
-table {
-  width: 400px;
-  border-collapse: collapse;
-  margin: auto;
-}
-
-th,
-td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: left;
-}
-
-th {
-  background-color: #f2f2f2;
-  color: black;
-}
-
 .td-left {
   text-align: center;
 }
 
 /* スマートフォン用のスタイル */
 @media (max-width: 600px) {
+  .my-table {
+    background-color: #f3f3f3;
+    margin: 1.5em 0 0 0m;
+    width: 95%;
+    position: relative;
+  }
+
   .icon_sm {
     position: absolute;
     width: 20px;
@@ -785,14 +785,12 @@ th {
   }
 
   .info-left-box {
-    height: 500px;
+    height: 670px;
     width: 90%;
     left: 5%;
     /* right: 5%; */
     top: 800px;
-    padding: 0%;
     /* margin-top: 20px; */
-    margin: 0 auto;
   }
 
   .table-title,

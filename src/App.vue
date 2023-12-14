@@ -14,7 +14,7 @@
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title><router-link class="routerLink" to="/booklist">読書管理システム</router-link></v-toolbar-title>
       <template v-slot:append>
-        <v-btn @click="rankingDrawer = !rankingDrawer">
+        <v-btn @click="showRanking">
           <svg-icon type="mdi" :path="path"></svg-icon>
         </v-btn>
       </template>
@@ -32,12 +32,32 @@
       </v-list>
     </v-navigation-drawer>
     <v-navigation-drawer v-model="rankingDrawer" color="#757575" location="right" width="100%">
-      <v-card>
+      <v-card v-if="isMobileView">
         <v-card-title>本日の読書量ランキング</v-card-title>
         <v-card-text>
-          <v-select v-model="selectedDepartment" :items="departments" label="職種" @update:model-value="filterByDepartment"
-            item-per-page="10" items-per-page-text="表示行数"></v-select>
-          <v-data-table :headers="headers" :items="filteredUsers" :items-per-page="10">
+          <v-select v-model="selectedDepartment" :items="departments" label="職種"
+            @update:model-value="filterByDepartment"></v-select>
+          <v-data-table :headers="smHeaders" items-per-page-text="表示行数" :items="filteredUsers.map(u => {
+            return { rank: u.rank, avatar: u.avatar, name: u.name, score: u.score }
+          })" :items-per-page="10">
+            <template v-slot:[`item.avatar`]="{ item }">
+              <v-avatar>
+                <v-img :src="item.avatar"></v-img>
+              </v-avatar>
+            </template>
+            <template v-slot:[`item.score`]="{ item }">
+              {{ item.score }}
+            </template>
+          </v-data-table>
+        </v-card-text>
+      </v-card>
+      <v-card v-if="!isMobileView">
+        <v-card-title>本日の読書量ランキング</v-card-title>
+        <v-card-text>
+          <v-select v-model="selectedDepartment" :items="departments" label="職種"
+            @update:model-value="filterByDepartment"></v-select>
+          <v-select v-model="selectedAge" :items="ages" label="年代" @update:model-value="filterByAge"></v-select>
+          <v-data-table :headers="headers" :items="filteredUsers" items-per-page-text="表示行数" items-per-page="10">
             <template v-slot:[`item.avatar`]="{ item }">
               <v-avatar>
                 <v-img :src="item.avatar"></v-img>
@@ -65,11 +85,15 @@ export default {
   },
   data: () => ({
     selectedDepartment: 'すべて',
+    selectedAge: '全年代',
+    ageMap: { _20代: 20, _30代: 30, _40代: 40, _50代: 50 },
     score: 0,
     departments: ['すべて', '営業', '事務', 'アプリSE', 'インフラSE'],
+    ages: ['全年代', '_20代', '_30代', '_40代', '_50代'],
     path: mdiTrophyAward,
     drawer: false,
     rankingDrawer: false,
+    isMobileView: window.innerWidth <= 600,
     items: [
       // { title: 'Home', icon: 'mdi-home' },
       { title: 'Book List', icon: 'mdi-book-open-page-variant', url: "/booklist" },
@@ -83,6 +107,12 @@ export default {
       { title: '職種', key: 'department', sortable: false },
       { title: '年齢', key: 'age', sortable: false },
       { title: 'ページ数', key: 'score', sortable: false },
+    ],
+    smHeaders: [
+      { title: 'Rank', key: 'rank', sortable: false },
+      { title: '', key: 'avatar', sortable: false },
+      { title: 'User', key: 'name', sortable: false },
+      { title: 'Pages', key: 'score', sortable: false },
     ],
     users: [
       { name: 's藤', score: 10, avatar: 'https://randomuser.me/api/portraits/women/1.jpg', rank: 0, age: 24, department: '営業' },
@@ -134,6 +164,39 @@ export default {
         this.filteredUsers = this.users.filter(
           (user) => user.department === this.selectedDepartment
         );
+      }
+    },
+    filterByAge() {
+      if (this.selectedAge === '全年代') {
+        this.filteredUsers = this.users;
+      } else {
+        this.filteredUsers = this.users.filter(
+          (user) => user.age < this.ageMap[this.selectedAge] + 10 && user.age >= this.ageMap[this.selectedAge]
+        );
+      }
+    },
+    showRanking() {
+      if (this.rankingDrawer) {
+        this.rankingDrawer = false
+      } else {
+        axios
+          .get("http://localhost:3000/pages/0")
+          .then((res) => {
+            console.log(res.data)
+            for (let user of this.users) {
+              if (user.name === 'いしくら') {
+                user.score = res.data.pages
+                break
+              }
+            }
+            this.users.sort((a, b) => b.score - a.score)
+          })
+          .then(() => {
+            this.users.forEach((user, index) => {
+              user.rank = index + 1;
+            });
+            this.rankingDrawer = true
+          })
       }
     },
   },
